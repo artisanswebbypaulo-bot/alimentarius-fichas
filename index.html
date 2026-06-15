@@ -1052,6 +1052,7 @@ function guardarReceita(rid){
 function delReceita(rid){
   rid=parseInt(rid)||rid;
   if(!confirm("Eliminar esta receita?"))return;
+  console.log("delReceita rid="+rid+" type="+typeof rid+" receitas="+receitas.length+" ids="+receitas.map(function(x){return x.id+"("+typeof x.id+")";}));
   receitas=receitas.filter(function(x){return x.id!=rid;}); rid=null; salvar(); renderSidebar();
   document.getElementById("sb-alerg").style.display="none";
   document.getElementById("content").innerHTML='<div class="card"><div class="cb empty">'
