@@ -164,14 +164,15 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#DFF0F9;color:var(--
 @media print{
   /* ── Ocultar interface ── */
   .topbar,.sidebar,.tabs-bar,.addbtn,.delbtn,.xbtns,.mo,
-  .srchbtn,.ntab,.recalc-btn,.cb-wrap,.nc-vr input,
+  .srchbtn,.ntab,.recalc-btn,.cb-wrap,.nc-vr input,.nc-vr .nc-un,
   .afc.nao,.alg-leg,.parea-edit,.select-edit,.input-edit,
   select,input[type=text],input[type=number],
   .alert-b,.n-tabs,.parea,.no-print
   {display:none!important;height:0!important;margin:0!important;padding:0!important;}
 
   /* ── Mostrar valores de impressão ── */
-  .print-val{display:inline!important;font-size:14px;font-weight:700;color:#1B2A35;}
+  .print-val{display:inline!important;font-size:12px;font-weight:600;color:#1B2A35;}
+  td .print-val{display:table-cell!important;}
   .print-confec{display:block!important;font-size:13px;font-weight:600;color:#1B2A35;margin-bottom:6px;}
   .print-ta{display:block!important;font-size:12px;white-space:pre-wrap;border:1px solid #e0e0e0;border-radius:4px;padding:7px;margin-top:4px;}
 
@@ -699,7 +700,7 @@ function renderTabIngredientes(r){
     +'</div>';
   var resumo=renderResumoNutri(r);
   return '<div class="tc'+(show?' active':'')+'"><div class="stit">Ingredientes da Receita</div>'
-    +'<div class="no-print" style="font-size:11px;color:var(--c2);margin-bottom:10px;line-height:1.5">Escreve o ingrediente e clica em \uD83D\uDD0D para classificar automaticamente (grupo de alimentos, alerg\u00e9nios e valores nutricionais).</div>'
+    +'<div class="no-print" style="font-size:11px;color:var(--c2);margin-bottom:10px;line-height:1.5" class="no-print">Escreve o ingrediente e clica em \uD83D\uDD0D para classificar automaticamente (grupo de alimentos, alerg\u00e9nios e valores nutricionais).</div>'
     +'<div style="overflow-x:auto"><table class="dt" style="min-width:680px">'
     +'<thead><tr><th style="min-width:190px">Ingrediente</th><th style="width:70px">Qtd.</th><th style="width:85px">Un.</th><th style="min-width:130px">Grupo de Alimentos</th><th style="min-width:140px">Alerg\u00e9nios</th><th style="width:32px"></th></tr></thead>'
     +'<tbody id="ing-tbody-'+r.id+'">'+(rows||'<tr><td colspan="6" style="text-align:center;color:var(--c3);padding:18px">Sem ingredientes. Clica em "+ Adicionar".</td></tr>')+'</tbody>'
