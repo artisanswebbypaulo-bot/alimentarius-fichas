@@ -970,7 +970,8 @@ function delReceita(rid){
 }
 
 function exportWord(id){
-  var r=receitas.find(function(x){return x.id===id;}); if(!r)return;
+  var r=receitas.find(function(x){return x.id===id;}); 
+  if(!r){alert("Receita não encontrada. ID: "+id+" | Total receitas: "+receitas.length);return;}
   var CONSERV_LOCAL=[{v:"ref4",lbl:"Refrigerado (0-4\u00baC)",desc:"Manter em frigorifico. Temperatura m\u00e1xima 4\u00baC."},{v:"ref5",lbl:"Refrigerado (0-5\u00baC)",desc:"Manter em frigorifico. Temperatura m\u00e1xima 5\u00baC."},{v:"cong",lbl:"Congelado (-18\u00baC)",desc:"N\u00e3o recongelar ap\u00f3s descongelamento."},{v:"amb",lbl:"Temperatura ambiente",desc:"Local fresco, seco, ao abrigo da luz solar."},{v:"q63",lbl:"Quente (m\u00edn. 63\u00baC)",desc:"Manter temperatura m\u00ednima de 63\u00baC at\u00e9 ao servi\u00e7o."},{v:"q75",lbl:"Quente (m\u00edn. 75\u00baC)",desc:"Regenerar a temperatura m\u00ednima de 75\u00baC no centro t\u00e9rmico."},{v:"vitrine",lbl:"Vitrina refrigerada (\u22645\u00baC)",desc:"Expositor refrigerado. N\u00e3o misturar com outros alimentos."}];
   var alergSim=ALERG.filter(function(a){return r.alergenios[a.id]==="sim";}).map(function(a){return a.nome;}).join(", ")||"Nenhum";
   var alergPos=ALERG.filter(function(a){return r.alergenios[a.id]==="possivel";}).map(function(a){return a.nome;}).join(", ")||"Nenhum";
