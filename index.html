@@ -969,21 +969,41 @@ function delReceita(rid){
     +'</div></div>';
 }
 
-async function exportWord(id){
+function exportWord(id){
   var r=receitas.find(function(x){return x.id===id;}); if(!r)return;
-  try{
-    var resp=await fetch("/api/export-docx",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({receita:r})});
-    if(resp.ok){var blob=await resp.blob();var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=(r.nome||"receita").replace(/[^\\w\\-]/g,"_")+".docx";a.click();}
-    else throw new Error();
-  }catch(e){alert("Para exportar Word/PDF, corre na pasta:\\n\\nnode server.js\\n\\nDepois abre http://localhost:8765");}
+  var CONSERV_LOCAL=[{v:"ref4",lbl:"Refrigerado (0-4\u00baC)",desc:"Manter em frigorifico. Temperatura m\u00e1xima 4\u00baC."},{v:"ref5",lbl:"Refrigerado (0-5\u00baC)",desc:"Manter em frigorifico. Temperatura m\u00e1xima 5\u00baC."},{v:"cong",lbl:"Congelado (-18\u00baC)",desc:"N\u00e3o recongelar ap\u00f3s descongelamento."},{v:"amb",lbl:"Temperatura ambiente",desc:"Local fresco, seco, ao abrigo da luz solar."},{v:"q63",lbl:"Quente (m\u00edn. 63\u00baC)",desc:"Manter temperatura m\u00ednima de 63\u00baC at\u00e9 ao servi\u00e7o."},{v:"q75",lbl:"Quente (m\u00edn. 75\u00baC)",desc:"Regenerar a temperatura m\u00ednima de 75\u00baC no centro t\u00e9rmico."},{v:"vitrine",lbl:"Vitrina refrigerada (\u22645\u00baC)",desc:"Expositor refrigerado. N\u00e3o misturar com outros alimentos."}];
+  var alergSim=ALERG.filter(function(a){return r.alergenios[a.id]==="sim";}).map(function(a){return a.nome;}).join(", ")||"Nenhum";
+  var alergPos=ALERG.filter(function(a){return r.alergenios[a.id]==="possivel";}).map(function(a){return a.nome;}).join(", ")||"Nenhum";
+  var ingRows=r.ingredientes.map(function(ing){
+    var nova=ing.grupo?"G"+ing.grupo:"\u2014";
+    var alerg=(ing.alergenios_detectados||[]).map(function(aid){var a=ALERG.find(function(x){return x.id===aid;});return a?a.nome:aid;}).join(", ")||"\u2014";
+    return "<tr><td>"+(ing.nome||"")+"</td><td>"+(ing.qty||"")+" "+(ing.unidade||"")+"</td><td>"+nova+"</td><td>"+alerg+"</td></tr>";
+  }).join("");
+  var micro=MICRO[r.grupo_micro||"1A"];
+  var microRows=(micro?micro.rows:[]).map(function(m){return "<tr><td>"+m[0]+"</td><td>"+m[1]+"</td></tr>";}).join("");
+  var conservObj=CONSERV_LOCAL.find(function(c){return c.v===r.conservacao;})||{};
+  var tipos=(r.tipos_confec&&r.tipos_confec.length)?r.tipos_confec.join(", "):"";
+  var html="<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>"
+    +"<head><meta charset='UTF-8'><title>"+r.nome+"</title>"
+    +"<style>body{font-family:Arial,sans-serif;font-size:11pt;margin:2cm}h1{font-size:16pt;color:#008DD2}h2{font-size:12pt;color:#006FA8;border-bottom:1px solid #ccc;padding-bottom:4px;margin-top:16px}table{border-collapse:collapse;width:100%;margin-bottom:12px}td,th{border:1px solid #ccc;padding:5px 8px;font-size:10pt}th{background:#E6F4FB;font-weight:bold}.meta{color:#555;font-size:10pt;margin-bottom:16px}</style>"
+    +"</head><body>"
+    +"<h1>Ficha T\u00e9cnica \u2014 "+r.nome+"</h1>"
+    +"<p class='meta'>"+(r.cliente?"<strong>Cliente:</strong> "+r.cliente+" &nbsp; ":"")+"<strong>Categoria:</strong> "+r.categoria+" &nbsp; <strong>Doses:</strong> "+(r.doses||"\u2014")+(r.tempo?" &nbsp; <strong>Tempo:</strong> "+r.tempo+" min":"")+(r.dificuldade?" &nbsp; <strong>Dificuldade:</strong> "+r.dificuldade:"")+(tipos?" &nbsp; <strong>Confe\u00e7\u00e3o:</strong> "+tipos:"")+"</p>"
+    +"<h2>Ingredientes</h2><table><tr><th>Ingrediente</th><th>Quantidade</th><th>Grupo NOVA</th><th>Alerg\u00e9nios</th></tr>"+ingRows+"</table>"
+    +"<h2>Alerg\u00e9nios</h2><table><tr><th>Estado</th><th>Alerg\u00e9nios</th></tr><tr><td><strong>Presente</strong></td><td>"+alergSim+"</td></tr><tr><td><strong>Pode conter</strong></td><td>"+alergPos+"</td></tr></table>"
+    +(r.preparo_ingr||r.modo_confec?"<h2>Prepara\u00e7\u00e3o</h2>"+(r.preparo_ingr?"<p><strong>Prepara\u00e7\u00e3o dos Ingredientes:</strong><br>"+r.preparo_ingr+"</p>":"")+(r.modo_confec?"<p><strong>Modo de Confe\u00e7\u00e3o:</strong><br>"+r.modo_confec+"</p>":""):"")
+    +"<h2>Microbiol\u00f3gica</h2><p><em>"+(micro?micro.lbl:"")+"</em></p><table><tr><th>Microrganismo</th><th>Limite Satisfat\u00f3rio</th></tr>"+microRows+"</table>"
+    +"<h2>Conserva\u00e7\u00e3o</h2><table><tr><th>Campo</th><th>Valor</th></tr>"+(conservObj.lbl?"<tr><td>Instru\u00e7\u00f5es</td><td>"+conservObj.lbl+"</td></tr>":"")+(conservObj.desc?"<tr><td>Descri\u00e7\u00e3o</td><td>"+conservObj.desc+"</td></tr>":"")+(r.validade?"<tr><td>Prazo de Validade</td><td>"+r.validade+"</td></tr>":"")+(r.notas_conservacao?"<tr><td>Notas</td><td>"+r.notas_conservacao+"</td></tr>":"")+"</table>"
+    +"</body></html>";
+  var blob=new Blob(["\ufeff"+html],{type:"application/msword;charset=utf-8"});
+  var a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download=(r.nome||"receita").replace(/[^\w\-]/g,"_")+".doc";
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
 }
-async function exportPdf(id){
+function exportPdf(id){
   var r=receitas.find(function(x){return x.id===id;}); if(!r)return;
-  try{
-    var resp=await fetch("/api/export-pdf",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({receita:r})});
-    if(resp.ok){var blob=await resp.blob();var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=(r.nome||"receita").replace(/[^\\w\\-]/g,"_")+".pdf";a.click();}
-    else throw new Error();
-  }catch(e){window.print();}
+  window.print();
 }
 
 /* =========================================================
