@@ -1052,7 +1052,7 @@ function guardarReceita(rid){
 function delReceita(rid){
   rid=parseInt(rid)||rid;
   if(!confirm("Eliminar esta receita?"))return;
-  receitas=receitas.filter(function(x){return x.id!==rid;}); rid=null; salvar(); renderSidebar();
+  receitas=receitas.filter(function(x){return x.id!=rid;}); rid=null; salvar(); renderSidebar();
   document.getElementById("sb-alerg").style.display="none";
   document.getElementById("content").innerHTML='<div class="card"><div class="cb empty">'
     +'<div class="ei">\uD83D\uDCCB</div><h2>Nenhuma receita selecionada</h2>'
