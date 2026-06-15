@@ -6,4 +6,3 @@
   for = "/*"
   [headers.values]
     Content-Security-Policy = "default-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data: https://api.anthropic.com"
- 
