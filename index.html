@@ -121,6 +121,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#DFF0F9;color:var(--
 .iinp{width:100%;padding:5px 8px;border:1.5px solid var(--bd);border-radius:5px;font-size:12px;outline:none;font-family:inherit;}
 .iinp:focus{border-color:var(--az);} .iinp.ok{border-color:var(--vd);} .iinp.err{border-color:var(--vm);}
 .print-confec{display:none;}
+.print-val{display:none;font-size:15px;font-weight:500;color:var(--c1);}
 .srchbtn{padding:4px 7px;background:var(--az-bg);border:1px solid var(--az-b);border-radius:4px;cursor:pointer;font-size:13px;flex-shrink:0;}
 .parea{width:100%;min-height:75px;border:1.5px solid var(--bd);border-radius:7px;padding:9px;font-size:13px;font-family:inherit;resize:vertical;outline:none;}
 .parea:focus{border-color:var(--az);}
@@ -160,9 +161,14 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#DFF0F9;color:var(--
 }
 @media print{
   .topbar,.sidebar,.tabs-bar,.addbtn,.delbtn,.xbtns,.mo,
-  .srchbtn,.ntab,.recalc-btn,.nc-vr input,.cb-wrap input[type=checkbox]
+  .srchbtn,.ntab,.recalc-btn,.cb-wrap,.nc-vr input,
+  .parea-edit,.select-edit,.input-edit,
+  select,input[type=text],input[type=number]
   {display:none!important;height:0!important;margin:0!important;padding:0!important;}
-  .main{padding:0;display:block!important;} .content{width:100%!important;}
+  .print-val{display:block!important;}
+  .print-confec{display:block!important;}
+  .main{padding:0;margin:0;display:block!important;}
+  .content{width:100%!important;page-break-inside:avoid;break-inside:avoid;}
   .layout{display:block!important;padding:0!important;}
   .tc{display:block!important;}
   .card{box-shadow:none;border:1px solid #ccc;margin-bottom:0;border-bottom:none;page-break-inside:avoid;break-inside:avoid;}
@@ -172,10 +178,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#DFF0F9;color:var(--
   .rstat{display:inline-block;}
   .rmeta{flex-wrap:wrap;}
   body{background:white!important;margin:0!important;}
-  .content{page-break-inside:avoid;break-inside:avoid;}
+  .nc{page-break-inside:avoid;break-inside:avoid;}
   .nc-vr{justify-content:center;}
-  .print-confec{display:none;}
-  @media print{ .cb-wrap{display:none!important;} .print-confec{display:block!important;} }
 }
 </style>
 </head>
@@ -857,7 +861,9 @@ function renderTabNutricional(r){
     var isAuto=temAuto&&manual[n.k]===undefined;
     return '<div class="nc'+(isAuto?' auto':'')+'"><div class="nc-vr">'
       +'<input type="number" value="'+valDose+'" min="0" step="0.01" onchange="editNutriManual('+r.id+',\''+n.k+'\',parseFloat(this.value)*'+doses+'||0)">'
-      +'<span class="nc-un">'+n.unit+'</span></div>'
+      +'<span class="nc-un">'+n.unit+'</span>'
+      +'<span class="print-val" style="font-size:18px;font-weight:700">'+valDose+'</span>'
+      +'<span class="print-val nc-un">'+n.unit+'</span></div>'
       +'<div class="nc-lb">'+n.lbl+'</div>'
       +'<div class="nc-bw"><div class="nc-b" style="width:'+pct+'%;background:'+cor+'"></div></div>'
       +'<div class="nc-vd">'+pct+'% VD \u00b7 VDR '+vdr+n.unit+'</div>'
@@ -941,7 +947,7 @@ function renderTabMicro(r){
   }).join("");
   return '<div class="tc'+(show?' active':'')+'"><div style="margin-bottom:12px">'
     +'<div class="stit">Grupo Microbiologico INSA</div>'
-    +'<select onchange="editCampo('+r.id+',\'grupo_micro\',this.value)" style="padding:7px 9px;border:1.5px solid var(--bd);border-radius:6px;font-size:13px;outline:none;width:100%">'+sel+'</select>'
+    +'<select onchange="editCampo('+r.id+',\'grupo_micro\',this.value)" style="padding:7px 9px;border:1.5px solid var(--bd);border-radius:6px;font-size:13px;outline:none;width:100%">'+sel+'</select>'+'<span class="print-val">'+(r.grupo_micro||'1A')+' \u2014 '+(MICRO_GRUPOS[r.grupo_micro||'1A'].lbl||'')+'</span>'
     +'<div style="margin-top:6px;font-size:11px;font-style:italic;color:var(--c2)">'+grp.lbl+'</div></div>'
     +'<table class="dt"><thead><tr><th>Microrganismo</th><th>Satisfat\u00f3rio</th><th>N\u00e3o Satisfat\u00f3rio</th></tr></thead><tbody>'+rows+'</tbody></table>'
     +'<div class="info-b" style="margin-top:10px">Fonte: Valores Guia INSA. Regulamento (CE) 2073/2005.</div>'
@@ -956,7 +962,7 @@ function renderTabConservacao(r){
   var opts=CONSERVACAO.map(function(c){return '<option value="'+c.v+'"'+(r.conservacao===c.v?' selected':'')+'>'+c.lbl+'</option>';}).join("");
   var desc=(CONSERVACAO.find(function(c){return c.v===r.conservacao;})||{}).desc||"";
   return '<div class="tc'+(show?' active':'')+'">'
-    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">'    +'<div><div class="stit">Instru\u00e7\u00f5es de Conserva\u00e7\u00e3o</div>'    +'<select onchange="editCampoR('+r.id+',\'conservacao\',this.value)" style="padding:7px 9px;border:1.5px solid var(--bd);border-radius:6px;font-size:13px;outline:none;width:100%">'    +'<option value="">Selecionar</option>'+opts+'</select>'    +(desc?'<div class="ok-b" style="margin-top:8px;font-size:12px">'+desc+'</div>':"")    +'</div>'    +'<div><div class="stit">Prazo de Validade</div>'    +'<input type="text" value="'+(r.validade||"")+'" placeholder="Ex: 3 dias ap\u00f3s confe\u00e7\u00e3o" onchange="editCampo('+r.id+',\'validade\',this.value)" style="padding:7px 9px;border:1.5px solid var(--bd);border-radius:6px;font-size:13px;outline:none;width:100%">'    +'</div></div>'    +'<div class="stit">Notas de Conserva\u00e7\u00e3o</div>'    +'<textarea class="parea" onblur="editCampo('+r.id+',\'notas_conservacao\',this.value)" placeholder="Instru\u00e7\u00f5es adicionais...">'+(r.notas_conservacao||"")+'</textarea>'    +'<div class="alert-b" style="margin-top:10px">'    +'\uD83D\uDCCB <strong>Rotulagem obrigat\u00f3ria:</strong> data de confe\u00e7\u00e3o, ingredientes, alerg\u00e9nios, data de validade, n.\u00ba de lote.<br>'    +'\uD83E\uDDCA Sobremesas em exposi\u00e7\u00e3o: m\u00e1x. 5\u00baC, sem mistura com outros alimentos.'    +'</div></div>';
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">'    +'<div><div class="stit">Instru\u00e7\u00f5es de Conserva\u00e7\u00e3o</div>'    +'<select onchange="editCampoR('+r.id+',\'conservacao\',this.value)" style="padding:7px 9px;border:1.5px solid var(--bd);border-radius:6px;font-size:13px;outline:none;width:100%">'    +'<option value="">Selecionar</option>'+opts+'</select>'+'<span class="print-val">'+((CONSERVACAO.find(function(c){return c.v===r.conservacao;})||{}).lbl||'Não definido')+'</span>'    +(desc?'<div class="ok-b" style="margin-top:8px;font-size:12px">'+desc+'</div>':"")    +'</div>'    +'<div><div class="stit">Prazo de Validade</div>'    +'<input type="text" value="'+(r.validade||"")+'" placeholder="Ex: 3 dias ap\u00f3s confe\u00e7\u00e3o" onchange="editCampo('+r.id+',\'validade\',this.value)" style="padding:7px 9px;border:1.5px solid var(--bd);border-radius:6px;font-size:13px;outline:none;width:100%">'+'<span class="print-val">'+(r.validade||'Não definido')+'</span>'    +'</div></div>'    +'<div class="stit">Notas de Conserva\u00e7\u00e3o</div>'    +'<textarea class="parea" onblur="editCampo('+r.id+',\'notas_conservacao\',this.value)" placeholder="Instru\u00e7\u00f5es adicionais...">'+(r.notas_conservacao||"")+'</textarea>'    +'<div class="alert-b" style="margin-top:10px">'    +'\uD83D\uDCCB <strong>Rotulagem obrigat\u00f3ria:</strong> data de confe\u00e7\u00e3o, ingredientes, alerg\u00e9nios, data de validade, n.\u00ba de lote.<br>'    +'\uD83E\uDDCA Sobremesas em exposi\u00e7\u00e3o: m\u00e1x. 5\u00baC, sem mistura com outros alimentos.'    +'</div></div>';
 }
 
 /* =========================================================
