@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt">
-<head>
+<he
+  .parea{display:none!important;}ad>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Fichas T&#233;cnicas &#8212; Alimentarius</title>
@@ -60,7 +61,6 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#DFF0F9;color:var(--
 .btnx{padding:6px 13px;border-radius:6px;border:none;cursor:pointer;font-size:12px;font-weight:700;display:flex;align-items:center;gap:4px;transition:opacity .15s;}
 .btnx:hover{opacity:.82;}
 .bpdf{background:var(--vm);color:#fff;}
-.bsav{background:#2e7d32;color:#fff;}
 .bdel{background:var(--c4);color:var(--c2);border:1px solid var(--bd);}
 .tabs-bar{display:flex;border-bottom:2px solid var(--bd);padding:0 15px;overflow-x:auto;background:#fff;}
 .tab{padding:10px 13px;font-size:12px;font-weight:700;color:var(--c2);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:color .15s,border-color .15s;white-space:nowrap;}
@@ -164,15 +164,14 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#DFF0F9;color:var(--
 @media print{
   /* ── Ocultar interface ── */
   .topbar,.sidebar,.tabs-bar,.addbtn,.delbtn,.xbtns,.mo,
-  .srchbtn,.ntab,.recalc-btn,.cb-wrap,.nc-vr input,.nc-vr .nc-un,
+  .srchbtn,.ntab,.recalc-btn,.cb-wrap,.nc-vr input,
   .afc.nao,.alg-leg,.parea-edit,.select-edit,.input-edit,
   select,input[type=text],input[type=number],
-  .alert-b,.n-tabs,.parea,.no-print
+  .alert-b,.n-tabs,.parea
   {display:none!important;height:0!important;margin:0!important;padding:0!important;}
 
   /* ── Mostrar valores de impressão ── */
-  .print-val{display:inline!important;font-size:12px;font-weight:600;color:#1B2A35;}
-  td .print-val{display:table-cell!important;}
+  .print-val{display:inline!important;font-size:14px;font-weight:700;color:#1B2A35;}
   .print-confec{display:block!important;font-size:13px;font-weight:600;color:#1B2A35;margin-bottom:6px;}
   .print-ta{display:block!important;font-size:12px;white-space:pre-wrap;border:1px solid #e0e0e0;border-radius:4px;padding:7px;margin-top:4px;}
 
@@ -600,7 +599,7 @@ function renderSbAlerg(){
 /* =========================================================
    FICHA PRINCIPAL
    ========================================================= */
-function selReceita(id){ rid=parseInt(id)||id; activeTab="ingredientes"; nFaixa="adulto"; renderSidebar(); renderFicha(); renderSbAlerg(); }
+function selReceita(id){ rid=id; activeTab="ingredientes"; nFaixa="adulto"; renderSidebar(); renderFicha(); renderSbAlerg(); }
 
 function renderFicha(){
   var r=receitas.find(function(x){return x.id===rid;}); if(!r)return;
@@ -622,10 +621,9 @@ function renderFicha(){
     +'<div class="pill">\uD83D\uDCC1 '+r.categoria+'</div>'
     +'</div>'
     +'<div class="xbtns">'
-    +'<button class="btnx bsav" onclick="guardarReceita(\'+r.id+\')">💾 Guardar</button>'
-    +'<button class="btnx bpdf" onclick="window.print()">🖨 Imprimir</button>'
-    +'<button class="btnx bpdf" onclick="window.print()">📑 PDF</button>'
-    +'<button class="btnx bdel" onclick="delReceita(\'+r.id+\')">🗑 Eliminar</button>'
+    +'<button class="btnx bpdf" onclick="window.print()">\uD83D\uDDC8 Imprimir</button>'
+    +'<button class="btnx bpdf" onclick="window.print()">\uD83D\uDCD1 PDF</button>'
+    +'<button class="btnx bdel" onclick="delReceita(\'+r.id+\')">\uD83D\uDDD1 Eliminar</button>'
     +'</div>'
     +'</div></div>'
     +'<div><div class="rstat '+(nAlerg>0?"al":"ok")+'">'+(nAlerg>0?"\u26A0 "+nAlerg+" alerg.":"\u2713 Sem alerg\u00e9nios")+'</div></div>'
@@ -701,7 +699,7 @@ function renderTabIngredientes(r){
     +'</div>';
   var resumo=renderResumoNutri(r);
   return '<div class="tc'+(show?' active':'')+'"><div class="stit">Ingredientes da Receita</div>'
-    +'<div class="no-print" style="font-size:11px;color:var(--c2);margin-bottom:10px;line-height:1.5" class="no-print">Escreve o ingrediente e clica em \uD83D\uDD0D para classificar automaticamente (grupo de alimentos, alerg\u00e9nios e valores nutricionais).</div>'
+    +'<div style="font-size:11px;color:var(--c2);margin-bottom:10px;line-height:1.5">Escreve o ingrediente e clica em \uD83D\uDD0D para classificar automaticamente (grupo de alimentos, alerg\u00e9nios e valores nutricionais).</div>'
     +'<div style="overflow-x:auto"><table class="dt" style="min-width:680px">'
     +'<thead><tr><th style="min-width:190px">Ingrediente</th><th style="width:70px">Qtd.</th><th style="width:85px">Un.</th><th style="min-width:130px">Grupo de Alimentos</th><th style="min-width:140px">Alerg\u00e9nios</th><th style="width:32px"></th></tr></thead>'
     +'<tbody id="ing-tbody-'+r.id+'">'+(rows||'<tr><td colspan="6" style="text-align:center;color:var(--c3);padding:18px">Sem ingredientes. Clica em "+ Adicionar".</td></tr>')+'</tbody>'
@@ -728,14 +726,12 @@ function renderIngRow(rid,ing,i){
   return '<tr id="ing-row-'+rid+'-'+i+'">'
     +'<td><div style="display:flex;gap:4px;align-items:center">'
     +'<input class="'+inpCls+'" id="ing-inp-'+rid+'-'+i+'" value="'+safeName+'" placeholder="Nome do ingrediente" onchange="updateIngNome('+rid+','+i+',this.value)">'
-    +'<span class="print-val" style="font-size:12px">'+safeName+'</span>'
     +'<button class="srchbtn" onclick="pesquisarIngrediente('+rid+','+i+')" title="Pesquisar automaticamente">\uD83D\uDD0D</button>'
     +'</div></td>'
-    +'<td>'+'<input type="number" value="'+(ing.qty||100)+'" min="0" step="1" onchange="updateIngField('+rid+','+i+',\'qty\',parseFloat(this.value)||0)" style="width:60px">'+'<span class="print-val" style="font-size:12px">'+(ing.qty||100)+'</span>'+'</td>'
-    +'<td>'+'<select onchange="updateIngField('+rid+','+i+',\'unidade\',this.value)">'
+    +'<td><input type="number" value="'+(ing.qty||100)+'" min="0" step="1" onchange="updateIngField('+rid+','+i+',\'qty\',parseFloat(this.value)||0)" style="width:60px"></td>'
+    +'<td><select onchange="updateIngField('+rid+','+i+',\'unidade\',this.value)">'
     +["g","kg","ml","L","un","c.s.","c.c.","a gosto"].map(function(u){return '<option'+(ing.unidade===u?' selected':'')+'>'+u+'</option>';}).join("")
-    +'</select>'
-    +'<span class="print-val" style="font-size:12px">'+(ing.unidade||'g')+'</span>'+'</td>'
+    +'</select></td>'
     +'<td>'+grupoTag+'</td>'
     +'<td>'+alrgStr+'</td>'
     +'<td><button class="delbtn" onclick="delIngrediente('+rid+','+i+')">✕</button></td>'
@@ -770,7 +766,6 @@ function addIngrediente(rid){
 }
 
 function delIngrediente(rid,i){
-  rid=parseInt(rid)||rid; i=parseInt(i)||0;
   var r=receitas.find(function(x){return x.id===rid;});
   r.ingredientes.splice(i,1);
   recalcAlerg(r); recalcNutri(r); salvar(); renderFicha(); renderSbAlerg();
@@ -792,7 +787,6 @@ function updateIngField(rid,i,campo,val){
    PESQUISA AUTOMÁTICA VIA CLAUDE API
    ========================================================= */
 async function pesquisarIngrediente(rid,i){
-  rid=parseInt(rid)||rid; i=parseInt(i)||0;
   var r=receitas.find(function(x){return x.id===rid;});
   var ing=r.ingredientes[i];
   var nome=(ing.nome||document.getElementById("ing-inp-"+rid+"-"+i).value||"").trim();
@@ -878,7 +872,7 @@ function renderTabAlergenios(r){
   var sAus=naoLst.length?makeChips(naoLst,"nao"):'<div style="color:var(--c3);font-size:11px;padding:6px">Nenhum</div>';
   return '<div class="tc'+(show?' active':'')+'">'
     +autoBox
-    +'<div style="margin-bottom:16px">'    +'<div class="stit" style="color:var(--vm)">Presente (declara\u00e7\u00e3o obrigat\u00f3ria)</div>'    +'<div class="af-grid" style="margin-bottom:0">'+sPres+'</div></div>'    +'<div style="margin-bottom:16px">'    +'<div class="stit" style="color:var(--la-d)">Pode conter (contamina\u00e7\u00e3o cruzada)  </div>'    +'<div class="af-grid" style="margin-bottom:0">'+sPode+'</div></div>'    +'<div>'    +'<div class="stit" style="color:var(--vd)">Ausente</div>'    +'<div class="af-grid" style="margin-bottom:0">'+sAus+'</div></div>'    +'<div style="margin-top:10px;font-size:11px;color:var(--c2)" class="no-print">Clica em qualquer alerg\u00e9nio para alterar o estado: Ausente \u2192 Presente \u2192 Pode conter \u2192 Ausente</div>'    +'<div class="info-b" style="margin-top:10px">\u26A0 <strong>Obriga\u00e7\u00e3o Legal:</strong> Reg. (UE) 1169/2011 e DL 26/2016 \u2014 14 alerg\u00e9nios de declara\u00e7\u00e3o obrigat\u00f3ria.</div>'    +'</div>';
+    +'<div style="margin-bottom:16px">'    +'<div class="stit" style="color:var(--vm)">Presente (declara\u00e7\u00e3o obrigat\u00f3ria)</div>'    +'<div class="af-grid" style="margin-bottom:0">'+sPres+'</div></div>'    +'<div style="margin-bottom:16px">'    +'<div class="stit" style="color:var(--la-d)">Pode conter (contamina\u00e7\u00e3o cruzada)  </div>'    +'<div class="af-grid" style="margin-bottom:0">'+sPode+'</div></div>'    +'<div>'    +'<div class="stit" style="color:var(--vd)">Ausente</div>'    +'<div class="af-grid" style="margin-bottom:0">'+sAus+'</div></div>'    +'<div style="margin-top:10px;font-size:11px;color:var(--c2)">Clica em qualquer alerg\u00e9nio para alterar o estado: Ausente \u2192 Presente \u2192 Pode conter \u2192 Ausente</div>'    +'<div class="info-b" style="margin-top:10px">\u26A0 <strong>Obriga\u00e7\u00e3o Legal:</strong> Reg. (UE) 1169/2011 e DL 26/2016 \u2014 14 alerg\u00e9nios de declara\u00e7\u00e3o obrigat\u00f3ria.</div>'    +'</div>';
 }
 
 function toggleAlerg(rid,aid){
@@ -938,9 +932,9 @@ function renderTabNutricional(r){
 
   return '<div class="tc'+(show?' active':'')+'"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">'
     +'<div class="n-tabs">'+fTabs+'</div>'
-    +'<div class="no-print" style="display:flex;gap:6px">'
-    +'<button onclick="recalcNutriBtn('+r.id+')" style="padding:4px 10px;border-radius:5px;border:1px solid var(--az-b);background:var(--az-bg);color:var(--az-d);font-size:11px;font-weight:700;cursor:pointer" class="recalc-btn">\u27F3 Recalcular</button>'
-    +'<button onclick="limparManual('+r.id+')" style="padding:4px 10px;border-radius:5px;border:1px solid var(--bd);background:var(--c4);color:var(--c2);font-size:11px;font-weight:700;cursor:pointer" class="recalc-btn">\u2715 Limpar manual</button>'
+    +'<div style="display:flex;gap:6px">'
+    +'<button onclick="recalcNutriBtn('+r.id+')" style="padding:4px 10px;border-radius:5px;border:1px solid var(--az-b);background:var(--az-bg);color:var(--az-d);font-size:11px;font-weight:700;cursor:pointer recalc-btn">\u27F3 Recalcular</button>'
+    +'<button onclick="limparManual('+r.id+')" style="padding:4px 10px;border-radius:5px;border:1px solid var(--bd);background:var(--c4);color:var(--c2);font-size:11px;font-weight:700;cursor:pointer recalc-btn">\u2715 Limpar manual</button>'
     +'</div></div>'
     +'<div class="ngrid">'+cards+'</div>'
     +autoInfo
@@ -1042,18 +1036,9 @@ function editCampoR(rid,campo,val){
   editCampo(rid,campo,val); renderFicha();
 }
 
-function guardarReceita(rid){
-  rid=parseInt(rid)||rid;
-  salvar();
-  var btn=document.querySelector(".bsav");
-  if(btn){var orig=btn.innerHTML;btn.innerHTML="✓ Guardado!";btn.style.background="#1b5e20";setTimeout(function(){btn.innerHTML=orig;btn.style.background="";},1500);}
-}
-
 function delReceita(rid){
-  rid=parseInt(rid)||rid;
   if(!confirm("Eliminar esta receita?"))return;
-  console.log("delReceita rid="+rid+" type="+typeof rid+" receitas="+receitas.length+" ids="+receitas.map(function(x){return x.id+"("+typeof x.id+")";}));
-  receitas=receitas.filter(function(x){return x.id!=rid;}); rid=null; salvar(); renderSidebar();
+  receitas=receitas.filter(function(x){return x.id!==rid;}); rid=null; salvar(); renderSidebar();
   document.getElementById("sb-alerg").style.display="none";
   document.getElementById("content").innerHTML='<div class="card"><div class="cb empty">'
     +'<div class="ei">\uD83D\uDCCB</div><h2>Nenhuma receita selecionada</h2>'
