@@ -1,9 +1,12 @@
-[build]
+toml[build]
   functions = "netlify/functions"
   publish = "."
 
 [[headers]]
   for = "/*"
   [headers.values]
-    X-Frame-Options = "SAMEORIGIN"
-    X-Content-Type-Options = "nosniff"
+    Content-Security-Policy = "default-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data: https://api.anthropic.com"
+
+Commit changes
+
+O nome dos ficheiros no GitHub não muda — continua index.html e netlify.toml. O nome do ficheiro que descarregaste (ficha tecnica receita.html) é só o nome local no teu computador.
