@@ -185,8 +185,9 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#DFF0F9;color:var(--
 
   /* ── Cards: unidos sem quebra ── */
   .card{box-shadow:none!important;border:none!important;border-bottom:1px solid #e0e0e0!important;margin:0!important;padding:0!important;}
-  .card:first-child{page-break-after:avoid;break-after:avoid;}
+  .card:first-child{page-break-after:avoid;break-after:avoid;display:inline-block;width:100%;}
   .card:last-child{border-bottom:none!important;}
+  .content{display:block!important;}
   .cb{padding:10px 14px!important;}
 
   /* ── Cabeçalho da ficha ── */
@@ -976,10 +977,10 @@ function renderTabPreparacao(r){
     +'<div class="print-confec" style="margin-bottom:14px;font-size:13px">'+(sel.length?sel.join(', '):'N\u00e3o especificado')+'</div>'
     +'<div class="stit">Prepara\u00e7\u00e3o dos Ingredientes</div>'
     +'<textarea class="parea" onblur="editCampo('+r.id+',\'preparo_ingr\',this.value)" placeholder="Descascar, lavar, cortar...">'+(r.preparo_ingr||"")+'</textarea>'
-    +'<div class="print-ta" style="display:none;font-size:12px;white-space:pre-wrap;border:1px solid #e0e0e0;border-radius:4px;padding:7px;min-height:30px">'+(r.preparo_ingr||'—')+'</div>'
+    +'<div class="print-ta">'+(r.preparo_ingr||'—')+'</div>'
     +'<div style="margin-top:12px"><div class="stit">Modo de Confe\u00e7\u00e3o</div>'
     +'<textarea class="parea" style="min-height:100px" onblur="editCampo('+r.id+',\'modo_confec\',this.value)" placeholder="Passo a passo...">'+(r.modo_confec||"")+'</textarea></div>'
-    +'<div class="print-ta" style="display:none;font-size:12px;white-space:pre-wrap;border:1px solid #e0e0e0;border-radius:4px;padding:7px;min-height:30px">'+(r.modo_confec||'—')+'</div>'
+    +'<div class="print-ta">'+(r.modo_confec||'—')+'</div>'
     +'<div class="alert-b">'
     +'\uD83D\uDEBF Lavar e desinfetar as m\u00e3os ap\u00f3s manusear alimentos crus.<br>'
     +'\uD83C\uDF21 Verificar temperatura interna com term\u00f3metro de sonda.<br>'
