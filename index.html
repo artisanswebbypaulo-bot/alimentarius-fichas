@@ -162,11 +162,14 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#DFF0F9;color:var(--
   .main{padding:0;display:block!important;} .content{width:100%!important;}
   .layout{display:block!important;padding:0!important;}
   .tc{display:block!important;}
-  .card{box-shadow:none;border:1px solid #ccc;break-inside:avoid;margin-bottom:8px;}
+  .card{box-shadow:none;border:1px solid #ccc;margin-bottom:0;border-bottom:none;}
+  .card:last-child{border-bottom:1px solid #ccc;}
+  .card+.card{border-top:none;}
   .cb{padding:8px!important;}
   .rstat{display:inline-block;}
   .rmeta{flex-wrap:wrap;}
   body{background:white!important;margin:0!important;}
+  .content{break-inside:avoid;}
 }
 </style>
 </head>
@@ -553,13 +556,14 @@ function renderFicha(){
     +'<div class="pill">\uD83D\uDCC1 '+r.categoria+'</div>'
     +'</div>'
     +'<div class="xbtns">'
-    +'<button class="btnx bpdf" onclick="exportPdf('+r.id+')">\uD83D\uDCD1 Imprimir / PDF</button>'
-    +'<button class="btnx bdel" onclick="delReceita('+r.id+')">\uD83D\uDDD1 Eliminar</button>'
+    +'<button class="btnx bpdf" onclick="window.print()">\uD83D\uDDC8 Imprimir</button>'
+    +'<button class="btnx bpdf" onclick="window.print()">\uD83D\uDCD1 PDF</button>'
+    +'<button class="btnx bdel" onclick="delReceita(\'+r.id+\')">\uD83D\uDDD1 Eliminar</button>'
     +'</div>'
     +'</div></div>'
     +'<div><div class="rstat '+(nAlerg>0?"al":"ok")+'">'+(nAlerg>0?"\u26A0 "+nAlerg+" alerg.":"\u2713 Sem alerg\u00e9nios")+'</div></div>'
     +'</div></div></div>'
-    +'<div class="card">'
+    +'<div class="card" style="border-top:none;">'
     +'<div class="tabs-bar">'+TABS.map(function(t){return '<div class="tab'+(activeTab===t[0]?' active':'')+'" onclick="mudaTab(\''+t[0]+'\')">'+t[1]+'</div>';}).join("")+'</div>'
     +'<div class="cb">'+renderTabIngredientes(r)+renderTabAlergenios(r)+renderTabNutricional(r)+renderTabPreparacao(r)+renderTabMicro(r)+renderTabConservacao(r)+'</div>'
     +'</div>';
