@@ -933,8 +933,8 @@ function renderTabNutricional(r){
   return '<div class="tc'+(show?' active':'')+'"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">'
     +'<div class="n-tabs">'+fTabs+'</div>'
     +'<div style="display:flex;gap:6px">'
-    +'<button onclick="recalcNutriBtn('+r.id+')" style="padding:4px 10px;border-radius:5px;border:1px solid var(--az-b);background:var(--az-bg);color:var(--az-d);font-size:11px;font-weight:700;cursor:pointer recalc-btn">\u27F3 Recalcular</button>'
-    +'<button onclick="limparManual('+r.id+')" style="padding:4px 10px;border-radius:5px;border:1px solid var(--bd);background:var(--c4);color:var(--c2);font-size:11px;font-weight:700;cursor:pointer recalc-btn">\u2715 Limpar manual</button>'
+    +'<button onclick="recalcNutriBtn('+r.id+')" style="padding:4px 10px;border-radius:5px;border:1px solid var(--az-b);background:var(--az-bg);color:var(--az-d);font-size:11px;font-weight:700;cursor:pointer" class="recalc-btn">\u27F3 Recalcular</button>'
+    +'<button onclick="limparManual('+r.id+')" style="padding:4px 10px;border-radius:5px;border:1px solid var(--bd);background:var(--c4);color:var(--c2);font-size:11px;font-weight:700;cursor:pointer" class="recalc-btn">\u2715 Limpar manual</button>'
     +'</div></div>'
     +'<div class="ngrid">'+cards+'</div>'
     +autoInfo
