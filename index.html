@@ -970,9 +970,10 @@ function delReceita(rid){
 }
 
 function exportWord(id){
+  id=parseInt(id)||id;
   var r=receitas.find(function(x){return x.id===id;}); 
   if(!r){alert("Receita não encontrada. ID: "+id+" | Total receitas: "+receitas.length);return;}
-  var CONSERV_LOCAL=[{v:"ref4",lbl:"Refrigerado (0-4\u00baC)",desc:"Manter em frigorifico. Temperatura m\u00e1xima 4\u00baC."},{v:"ref5",lbl:"Refrigerado (0-5\u00baC)",desc:"Manter em frigorifico. Temperatura m\u00e1xima 5\u00baC."},{v:"cong",lbl:"Congelado (-18\u00baC)",desc:"N\u00e3o recongelar ap\u00f3s descongelamento."},{v:"amb",lbl:"Temperatura ambiente",desc:"Local fresco, seco, ao abrigo da luz solar."},{v:"q63",lbl:"Quente (m\u00edn. 63\u00baC)",desc:"Manter temperatura m\u00ednima de 63\u00baC at\u00e9 ao servi\u00e7o."},{v:"q75",lbl:"Quente (m\u00edn. 75\u00baC)",desc:"Regenerar a temperatura m\u00ednima de 75\u00baC no centro t\u00e9rmico."},{v:"vitrine",lbl:"Vitrina refrigerada (\u22645\u00baC)",desc:"Expositor refrigerado. N\u00e3o misturar com outros alimentos."}];
+  var CONSERVACAO=[{v:"ref4",lbl:"Refrigerado (0-4\u00baC)",desc:"Manter em frigorifico. Temperatura m\u00e1xima 4\u00baC."},{v:"ref5",lbl:"Refrigerado (0-5\u00baC)",desc:"Manter em frigorifico. Temperatura m\u00e1xima 5\u00baC."},{v:"cong",lbl:"Congelado (-18\u00baC)",desc:"N\u00e3o recongelar ap\u00f3s descongelamento."},{v:"amb",lbl:"Temperatura ambiente",desc:"Local fresco, seco, ao abrigo da luz solar."},{v:"q63",lbl:"Quente (m\u00edn. 63\u00baC)",desc:"Manter temperatura m\u00ednima de 63\u00baC at\u00e9 ao servi\u00e7o."},{v:"q75",lbl:"Quente (m\u00edn. 75\u00baC)",desc:"Regenerar a temperatura m\u00ednima de 75\u00baC no centro t\u00e9rmico."},{v:"vitrine",lbl:"Vitrina refrigerada (\u22645\u00baC)",desc:"Expositor refrigerado. N\u00e3o misturar com outros alimentos."}];
   var alergSim=ALERG.filter(function(a){return r.alergenios[a.id]==="sim";}).map(function(a){return a.nome;}).join(", ")||"Nenhum";
   var alergPos=ALERG.filter(function(a){return r.alergenios[a.id]==="possivel";}).map(function(a){return a.nome;}).join(", ")||"Nenhum";
   var ingRows=r.ingredientes.map(function(ing){
@@ -980,9 +981,9 @@ function exportWord(id){
     var alerg=(ing.alergenios_detectados||[]).map(function(aid){var a=ALERG.find(function(x){return x.id===aid;});return a?a.nome:aid;}).join(", ")||"\u2014";
     return "<tr><td>"+(ing.nome||"")+"</td><td>"+(ing.qty||"")+" "+(ing.unidade||"")+"</td><td>"+nova+"</td><td>"+alerg+"</td></tr>";
   }).join("");
-  var micro=MICRO[r.grupo_micro||"1A"];
+  var micro=MICRO_GRUPOS[r.grupo_micro||"1A"];
   var microRows=(micro?micro.rows:[]).map(function(m){return "<tr><td>"+m[0]+"</td><td>"+m[1]+"</td></tr>";}).join("");
-  var conservObj=CONSERV_LOCAL.find(function(c){return c.v===r.conservacao;})||{};
+  var conservObj=CONSERVACAO.find(function(c){return c.v===r.conservacao;})||{};
   var tipos=(r.tipos_confec&&r.tipos_confec.length)?r.tipos_confec.join(", "):"";
   var html="<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>"
     +"<head><meta charset='UTF-8'><title>"+r.nome+"</title>"
@@ -1005,6 +1006,7 @@ function exportWord(id){
   setTimeout(function(){URL.revokeObjectURL(url);},1000);
 }
 function exportPdf(id){
+  id=parseInt(id)||id;
   var r=receitas.find(function(x){return x.id===id;}); if(!r)return;
   window.print();
 }
