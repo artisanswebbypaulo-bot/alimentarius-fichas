@@ -167,7 +167,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#DFF0F9;color:var(--
   .srchbtn,.ntab,.recalc-btn,.cb-wrap,.nc-vr input,
   .afc.nao,.alg-leg,.parea-edit,.select-edit,.input-edit,
   select,input[type=text],input[type=number],
-  .alert-b,.n-tabs,.parea
+  .alert-b,.n-tabs,.parea,.no-print
   {display:none!important;height:0!important;margin:0!important;padding:0!important;}
 
   /* ── Mostrar valores de impressão ── */
@@ -699,7 +699,7 @@ function renderTabIngredientes(r){
     +'</div>';
   var resumo=renderResumoNutri(r);
   return '<div class="tc'+(show?' active':'')+'"><div class="stit">Ingredientes da Receita</div>'
-    +'<div style="font-size:11px;color:var(--c2);margin-bottom:10px;line-height:1.5">Escreve o ingrediente e clica em \uD83D\uDD0D para classificar automaticamente (grupo de alimentos, alerg\u00e9nios e valores nutricionais).</div>'
+    +'<div class="no-print" style="font-size:11px;color:var(--c2);margin-bottom:10px;line-height:1.5">Escreve o ingrediente e clica em \uD83D\uDD0D para classificar automaticamente (grupo de alimentos, alerg\u00e9nios e valores nutricionais).</div>'
     +'<div style="overflow-x:auto"><table class="dt" style="min-width:680px">'
     +'<thead><tr><th style="min-width:190px">Ingrediente</th><th style="width:70px">Qtd.</th><th style="width:85px">Un.</th><th style="min-width:130px">Grupo de Alimentos</th><th style="min-width:140px">Alerg\u00e9nios</th><th style="width:32px"></th></tr></thead>'
     +'<tbody id="ing-tbody-'+r.id+'">'+(rows||'<tr><td colspan="6" style="text-align:center;color:var(--c3);padding:18px">Sem ingredientes. Clica em "+ Adicionar".</td></tr>')+'</tbody>'
@@ -726,12 +726,14 @@ function renderIngRow(rid,ing,i){
   return '<tr id="ing-row-'+rid+'-'+i+'">'
     +'<td><div style="display:flex;gap:4px;align-items:center">'
     +'<input class="'+inpCls+'" id="ing-inp-'+rid+'-'+i+'" value="'+safeName+'" placeholder="Nome do ingrediente" onchange="updateIngNome('+rid+','+i+',this.value)">'
+    +'<span class="print-val" style="font-size:12px">'+safeName+'</span>'
     +'<button class="srchbtn" onclick="pesquisarIngrediente('+rid+','+i+')" title="Pesquisar automaticamente">\uD83D\uDD0D</button>'
     +'</div></td>'
-    +'<td><input type="number" value="'+(ing.qty||100)+'" min="0" step="1" onchange="updateIngField('+rid+','+i+',\'qty\',parseFloat(this.value)||0)" style="width:60px"></td>'
-    +'<td><select onchange="updateIngField('+rid+','+i+',\'unidade\',this.value)">'
+    +'<td>'+'<input type="number" value="'+(ing.qty||100)+'" min="0" step="1" onchange="updateIngField('+rid+','+i+',\'qty\',parseFloat(this.value)||0)" style="width:60px">'+'<span class="print-val" style="font-size:12px">'+(ing.qty||100)+'</span>'+'</td>'
+    +'<td>'+'<select onchange="updateIngField('+rid+','+i+',\'unidade\',this.value)">'
     +["g","kg","ml","L","un","c.s.","c.c.","a gosto"].map(function(u){return '<option'+(ing.unidade===u?' selected':'')+'>'+u+'</option>';}).join("")
-    +'</select></td>'
+    +'</select>'
+    +'<span class="print-val" style="font-size:12px">'+(ing.unidade||'g')+'</span>'+'</td>'
     +'<td>'+grupoTag+'</td>'
     +'<td>'+alrgStr+'</td>'
     +'<td><button class="delbtn" onclick="delIngrediente('+rid+','+i+')">✕</button></td>'
@@ -932,7 +934,7 @@ function renderTabNutricional(r){
 
   return '<div class="tc'+(show?' active':'')+'"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">'
     +'<div class="n-tabs">'+fTabs+'</div>'
-    +'<div style="display:flex;gap:6px">'
+    +'<div class="no-print" style="display:flex;gap:6px">'
     +'<button onclick="recalcNutriBtn('+r.id+')" style="padding:4px 10px;border-radius:5px;border:1px solid var(--az-b);background:var(--az-bg);color:var(--az-d);font-size:11px;font-weight:700;cursor:pointer" class="recalc-btn">\u27F3 Recalcular</button>'
     +'<button onclick="limparManual('+r.id+')" style="padding:4px 10px;border-radius:5px;border:1px solid var(--bd);background:var(--c4);color:var(--c2);font-size:11px;font-weight:700;cursor:pointer" class="recalc-btn">\u2715 Limpar manual</button>'
     +'</div></div>'
