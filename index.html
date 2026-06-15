@@ -727,9 +727,9 @@ function renderIngRow(rid,ing,i){
   var safeName=(ing.nome||"").replace(/[<>"']/g,"");
   return '<tr id="ing-row-'+rid+'-'+i+'">'
     +'<td><div style="display:flex;gap:4px;align-items:center;justify-content:flex-start">'
-    +'<input class="'+inpCls+'" id="ing-inp-'+rid+'-'+i+'" value="'+safeName+'" placeholder="Nome do ingrediente" onchange="updateIngNome('+rid+','+i+',this.value)">'
-    +'<span class="print-val">'+safeName+'</span>'
-    +'<button class="srchbtn" onclick="pesquisarIngrediente('+rid+','+i+')" title="Pesquisar automaticamente">\uD83D\uDD0D</button>'
+    +'<input class="'+inpCls+' no-print" id="ing-inp-'+rid+'-'+i+'" value="'+safeName+'" placeholder="Nome do ingrediente" onchange="updateIngNome('+rid+','+i+',this.value)">'
+    +'<button class="srchbtn no-print" onclick="pesquisarIngrediente('+rid+','+i+')" title="Pesquisar automaticamente">\uD83D\uDD0D</button>'
+    +'<span style="font-size:13px">'+safeName+'</span>'
     +'</div></td>'
     +'<td><input type="number" value="'+(ing.qty||100)+'" min="0" step="1" onchange="updateIngField('+rid+','+i+',\'qty\',parseFloat(this.value)||0)" style="width:60px"><span class="print-val">'+(ing.qty||100)+'</span></td>'
     +'<td><select onchange="updateIngField('+rid+','+i+',\'unidade\',this.value)">'
@@ -737,7 +737,7 @@ function renderIngRow(rid,ing,i){
     +'</select><span class="print-val">'+(ing.unidade||'g')+'</span></td>'
     +'<td>'+grupoTag+'</td>'
     +'<td>'+alrgStr+'</td>'
-    +'<td><button class="delbtn" onclick="delIngrediente('+rid+','+i+')">✕</button></td>'
+    +'<td class="no-print"><button class="delbtn" onclick="delIngrediente('+rid+','+i+')">✕</button></td>'
     +'</tr>';
 }
 
