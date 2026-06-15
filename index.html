@@ -1039,6 +1039,7 @@ function editCampoR(rid,campo,val){
 }
 
 function delReceita(rid){
+  rid=parseInt(rid)||rid;
   if(!confirm("Eliminar esta receita?"))return;
   receitas=receitas.filter(function(x){return x.id!==rid;}); rid=null; salvar(); renderSidebar();
   document.getElementById("sb-alerg").style.display="none";
