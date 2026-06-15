@@ -120,6 +120,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#DFF0F9;color:var(--
 .g3{background:#fdf2e6;color:#c46a0e;} .g4{background:var(--vm-bg);color:var(--vm);}
 .iinp{width:100%;padding:5px 8px;border:1.5px solid var(--bd);border-radius:5px;font-size:12px;outline:none;font-family:inherit;}
 .iinp:focus{border-color:var(--az);} .iinp.ok{border-color:var(--vd);} .iinp.err{border-color:var(--vm);}
+.print-confec{display:none;}
 .srchbtn{padding:4px 7px;background:var(--az-bg);border:1px solid var(--az-b);border-radius:4px;cursor:pointer;font-size:13px;flex-shrink:0;}
 .parea{width:100%;min-height:75px;border:1.5px solid var(--bd);border-radius:7px;padding:9px;font-size:13px;font-family:inherit;resize:vertical;outline:none;}
 .parea:focus{border-color:var(--az);}
@@ -158,18 +159,23 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#DFF0F9;color:var(--
   .ngrid{grid-template-columns:1fr 1fr;} .rsum-g{grid-template-columns:repeat(2,1fr);}
 }
 @media print{
-  .topbar,.sidebar,.tabs-bar,.addbtn,.delbtn,.xbtns,.mo{display:none!important;height:0!important;margin:0!important;padding:0!important;}
+  .topbar,.sidebar,.tabs-bar,.addbtn,.delbtn,.xbtns,.mo,
+  .srchbtn,.ntab,.recalc-btn,.nc-vr input,.cb-wrap input[type=checkbox]
+  {display:none!important;height:0!important;margin:0!important;padding:0!important;}
   .main{padding:0;display:block!important;} .content{width:100%!important;}
   .layout{display:block!important;padding:0!important;}
   .tc{display:block!important;}
-  .card{box-shadow:none;border:1px solid #ccc;margin-bottom:0;border-bottom:none;}
-  .card:last-child{border-bottom:1px solid #ccc;}
+  .card{box-shadow:none;border:1px solid #ccc;margin-bottom:0;border-bottom:none;page-break-inside:avoid;break-inside:avoid;}
   .card+.card{border-top:none;}
+  .card:last-child{border-bottom:1px solid #ccc;}
   .cb{padding:8px!important;}
   .rstat{display:inline-block;}
   .rmeta{flex-wrap:wrap;}
   body{background:white!important;margin:0!important;}
-  .content{break-inside:avoid;}
+  .content{page-break-inside:avoid;break-inside:avoid;}
+  .nc-vr{justify-content:center;}
+  .print-confec{display:none;}
+  @media print{ .cb-wrap{display:none!important;} .print-confec{display:block!important;} }
 }
 </style>
 </head>
@@ -866,8 +872,8 @@ function renderTabNutricional(r){
   return '<div class="tc'+(show?' active':'')+'"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">'
     +'<div class="n-tabs">'+fTabs+'</div>'
     +'<div style="display:flex;gap:6px">'
-    +'<button onclick="recalcNutriBtn('+r.id+')" style="padding:4px 10px;border-radius:5px;border:1px solid var(--az-b);background:var(--az-bg);color:var(--az-d);font-size:11px;font-weight:700;cursor:pointer">\u27F3 Recalcular</button>'
-    +'<button onclick="limparManual('+r.id+')" style="padding:4px 10px;border-radius:5px;border:1px solid var(--bd);background:var(--c4);color:var(--c2);font-size:11px;font-weight:700;cursor:pointer">\u2715 Limpar manual</button>'
+    +'<button onclick="recalcNutriBtn('+r.id+')" style="padding:4px 10px;border-radius:5px;border:1px solid var(--az-b);background:var(--az-bg);color:var(--az-d);font-size:11px;font-weight:700;cursor:pointer recalc-btn">\u27F3 Recalcular</button>'
+    +'<button onclick="limparManual('+r.id+')" style="padding:4px 10px;border-radius:5px;border:1px solid var(--bd);background:var(--c4);color:var(--c2);font-size:11px;font-weight:700;cursor:pointer recalc-btn">\u2715 Limpar manual</button>'
     +'</div></div>'
     +'<div class="ngrid">'+cards+'</div>'
     +autoInfo
@@ -905,8 +911,9 @@ function renderTabPreparacao(r){
       +'<input type="checkbox" value="'+t+'"'+(checked?' checked':'')+' onchange="toggleConfec('+r.id+',this.value,this.checked)"> '+t+'</label>';
   }).join("");
   return '<div class="tc'+(show?' active':'')+'">'
-    +'<div class="stit">Tipo de Confe\u00e7\u00e3o <span style="font-size:10px;font-weight:400;color:var(--c2)">(escolha m\u00faltipla)</span></div>'
-    +'<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px">'+confecCheckboxes+'</div>'
+    +'<div class="stit">Tipo de Confe\u00e7\u00e3o</div>'
+    +'<div class="cb-wrap" style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px">'+confecCheckboxes+'</div>'
+    +'<div class="print-confec" style="margin-bottom:14px;font-size:13px">'+(sel.length?sel.join(', '):'N\u00e3o especificado')+'</div>'
     +'<div class="stit">Prepara\u00e7\u00e3o dos Ingredientes</div>'
     +'<textarea class="parea" onblur="editCampo('+r.id+',\'preparo_ingr\',this.value)" placeholder="Descascar, lavar, cortar...">'+(r.preparo_ingr||"")+'</textarea>'
     +'<div style="margin-top:12px"><div class="stit">Modo de Confe\u00e7\u00e3o</div>'
