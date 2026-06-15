@@ -160,26 +160,76 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#DFF0F9;color:var(--
   .ngrid{grid-template-columns:1fr 1fr;} .rsum-g{grid-template-columns:repeat(2,1fr);}
 }
 @media print{
+  /* ── Ocultar interface ── */
   .topbar,.sidebar,.tabs-bar,.addbtn,.delbtn,.xbtns,.mo,
   .srchbtn,.ntab,.recalc-btn,.cb-wrap,.nc-vr input,
-  .parea-edit,.select-edit,.input-edit,
-  select,input[type=text],input[type=number]
+  .afc.nao,.alg-leg,.parea-edit,.select-edit,.input-edit,
+  select,input[type=text],input[type=number],
+  .alert-b,.stit,.n-tabs
   {display:none!important;height:0!important;margin:0!important;padding:0!important;}
-  .print-val{display:block!important;}
-  .print-confec{display:block!important;}
+
+  /* ── Mostrar valores de impressão ── */
+  .print-val{display:inline!important;font-size:14px;font-weight:700;color:#1B2A35;}
+  .print-confec{display:block!important;font-size:13px;font-weight:600;color:#1B2A35;margin-bottom:6px;}
+
+  /* ── Layout base ── */
+  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
+  body{background:white!important;margin:0!important;font-family:'Segoe UI',Arial,sans-serif;font-size:12px;color:#1B2A35;}
   .main{padding:0;margin:0;display:block!important;}
-  .content{width:100%!important;page-break-inside:avoid;break-inside:avoid;}
+  .content{width:100%!important;}
   .layout{display:block!important;padding:0!important;}
   .tc{display:block!important;}
-  .card{box-shadow:none;border:1px solid #ccc;margin-bottom:0;border-bottom:none;page-break-inside:avoid;break-inside:avoid;}
-  .card+.card{border-top:none;}
-  .card:last-child{border-bottom:1px solid #ccc;}
-  .cb{padding:8px!important;}
-  .rstat{display:inline-block;}
-  .rmeta{flex-wrap:wrap;}
-  body{background:white!important;margin:0!important;}
-  .nc{page-break-inside:avoid;break-inside:avoid;}
-  .nc-vr{justify-content:center;}
+
+  /* ── Cards: unidos sem quebra ── */
+  .card{box-shadow:none!important;border:none!important;border-bottom:1px solid #e0e0e0!important;margin:0!important;padding:0!important;page-break-inside:avoid;break-inside:avoid;}
+  .card:last-child{border-bottom:none!important;}
+  .cb{padding:10px 14px!important;}
+
+  /* ── Cabeçalho da ficha ── */
+  .rtit{font-size:18px!important;font-weight:800!important;color:#006FA8!important;}
+  .rmeta{margin-top:5px!important;}
+  .pill{font-size:10px!important;padding:2px 7px!important;background:#f0f7fc!important;border-color:#c0ddf0!important;}
+  .rstat{font-size:10px!important;padding:3px 9px!important;}
+
+  /* ── Ingredientes ── */
+  .dt th{font-size:9px!important;padding:5px 8px!important;background:#e6f4fb!important;color:#006FA8!important;}
+  .dt td{font-size:11px!important;padding:5px 8px!important;border-bottom:1px solid #f0f2f4!important;}
+  .gt{font-size:8px!important;padding:1px 5px!important;}
+  .iinp{border:none!important;background:transparent!important;font-size:11px!important;}
+  .rsum{background:#e6f4fb!important;border:1px solid #99CFF0!important;margin-top:8px!important;}
+  .rsum-t{font-size:10px!important;}
+  .rsum-v{font-size:13px!important;}
+  .rsum-l{font-size:7px!important;}
+
+  /* ── Nutricional ── */
+  .ngrid{grid-template-columns:repeat(4,1fr)!important;gap:5px!important;}
+  .nc{padding:7px 6px!important;background:#f0f7fc!important;border:1px solid #c0ddf0!important;break-inside:avoid;}
+  .nc.auto{background:#e6f4fb!important;}
+  .nc-vr{justify-content:center!important;flex-direction:column!important;align-items:center!important;gap:0!important;}
+  .nc-lb{font-size:8px!important;margin-top:2px!important;}
+  .nc-bw{display:none!important;}
+  .nc-vd{font-size:8px!important;}
+  .nc-ai{font-size:8px!important;}
+  .ok-b{font-size:10px!important;padding:5px 9px!important;}
+  .info-b{font-size:10px!important;padding:5px 9px!important;}
+
+  /* ── Alergénios: ocultar ausentes, mostrar só presentes/possíveis ── */
+  .afc{padding:5px 3px!important;font-size:8px!important;}
+  .afc .ico{font-size:13px!important;}
+  .afc.nao{display:none!important;}
+  .af-grid{grid-template-columns:repeat(auto-fill,minmax(80px,1fr))!important;gap:4px!important;}
+
+  /* ── Preparação ── */
+  .parea{border:1px solid #e0e0e0!important;font-size:11px!important;min-height:0!important;padding:7px!important;}
+
+  /* ── Microbiológica ── */
+  .dt tr:hover td{background:transparent!important;}
+
+  /* ── Conservação ── */
+  .print-val{display:block!important;font-size:13px!important;font-weight:600!important;color:#1B2A35!important;padding:4px 0!important;}
+
+  /* ── Títulos de secção visíveis na impressão ── */
+  .stit{display:block!important;height:auto!important;margin-bottom:6px!important;padding-bottom:4px!important;font-size:9px!important;font-weight:800!important;color:#006FA8!important;text-transform:uppercase!important;letter-spacing:.5px!important;border-bottom:1px solid #c0ddf0!important;}
 }
 </style>
 </head>
