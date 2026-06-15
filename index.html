@@ -167,12 +167,13 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#DFF0F9;color:var(--
   .srchbtn,.ntab,.recalc-btn,.cb-wrap,.nc-vr input,
   .afc.nao,.alg-leg,.parea-edit,.select-edit,.input-edit,
   select,input[type=text],input[type=number],
-  .alert-b,.stit,.n-tabs
+  .alert-b,.n-tabs,.parea
   {display:none!important;height:0!important;margin:0!important;padding:0!important;}
 
   /* ── Mostrar valores de impressão ── */
   .print-val{display:inline!important;font-size:14px;font-weight:700;color:#1B2A35;}
   .print-confec{display:block!important;font-size:13px;font-weight:600;color:#1B2A35;margin-bottom:6px;}
+  .print-ta{display:block!important;font-size:12px;white-space:pre-wrap;border:1px solid #e0e0e0;border-radius:4px;padding:7px;margin-top:4px;}
 
   /* ── Layout base ── */
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
@@ -183,7 +184,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#DFF0F9;color:var(--
   .tc{display:block!important;}
 
   /* ── Cards: unidos sem quebra ── */
-  .card{box-shadow:none!important;border:none!important;border-bottom:1px solid #e0e0e0!important;margin:0!important;padding:0!important;page-break-inside:avoid;break-inside:avoid;}
+  .card{box-shadow:none!important;border:none!important;border-bottom:1px solid #e0e0e0!important;margin:0!important;padding:0!important;}
   .card:first-child{page-break-after:avoid;break-after:avoid;}
   .card:last-child{border-bottom:none!important;}
   .cb{padding:10px 14px!important;}
@@ -223,7 +224,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#DFF0F9;color:var(--
   .af-grid{grid-template-columns:repeat(auto-fill,minmax(80px,1fr))!important;gap:4px!important;}
 
   /* ── Preparação ── */
-  .parea{border:1px solid #e0e0e0!important;font-size:11px!important;min-height:0!important;padding:7px!important;}
+
 
   /* ── Microbiológica ── */
   .dt tr:hover td{background:transparent!important;}
@@ -692,7 +693,7 @@ function renderTabIngredientes(r){
   var show=activeTab==="ingredientes";
   var rows=r.ingredientes.map(function(ing,i){return renderIngRow(r.id,ing,i);}).join("");
   var gInfo='<div style="margin-top:10px;font-size:11px;color:var(--c2)">'
-    +'<strong>Grupos NOVA:</strong>'
+    +'<strong>Grupos Alimentos:</strong>'
     +GRUPOS_NOVA.map(function(g){return ' <span class="gt '+g.cls+'">'+g.lbl+'</span>';}).join("")
     +'</div>';
   var resumo=renderResumoNutri(r);
