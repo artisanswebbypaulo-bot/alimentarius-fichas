@@ -14,7 +14,7 @@
   --bd: #D4E0E8; --sh: 0 2px 12px rgba(0,141,210,.10); --r: 8px;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Segoe UI',system-ui,sans-serif;background:#DFF0F9;color:var(--c1);min-height:100vh;font-size:14px;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#DFF0F9;color:var(--c1);min-height:100vh;font-size:16px;}
 .topbar{background:linear-gradient(135deg,var(--az-d),var(--az));color:#fff;height:54px;padding:0 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:300;box-shadow:0 3px 12px rgba(0,113,168,.28);}
 .tbl{display:flex;align-items:center;gap:10px;}
 .logo-w{width:40px;height:40px;border-radius:50%;background:#fff;overflow:hidden;flex-shrink:0;}
@@ -70,7 +70,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#DFF0F9;color:var(--
 .tc.active{display:block;}
 .dt{width:100%;border-collapse:collapse;}
 .dt th{background:var(--az-bg);color:var(--az-d);font-size:11px;text-transform:uppercase;letter-spacing:.5px;padding:7px 10px;text-align:left;font-weight:800;}
-.dt td{padding:7px 10px;border-bottom:1px solid #f0f2f4;font-size:13px;vertical-align:middle;}
+.dt td{padding:7px 10px;border-bottom:1px solid #f0f2f4;font-size:13px;vertical-align:middle;text-align:left;}
 .dt tr:last-child td{border-bottom:none;}
 .dt tr:hover td{background:var(--az-bg);}
 .dt input,.dt select{border:1px solid transparent;border-radius:4px;padding:3px 6px;font-size:12px;background:transparent;font-family:inherit;outline:none;width:100%;}
@@ -614,12 +614,12 @@ function renderFicha(){
     +'<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap">'
     +'<div style="flex:1"><div class="rtit" contenteditable="true" onblur="editCampo('+r.id+',%22nome%22,this.textContent.trim())">'+r.nome+'</div>'
     +'<div class="rmeta">'
-    +(r.cliente?'<div class="pill c">\uD83D\uDC64 '+r.cliente+'</div>':'')
-    +(r.doses?'<div class="pill">\uD83C\uDF7D '+r.doses+' doses</div>':'')
-    +(r.tempo?'<div class="pill">\u23F1 '+r.tempo+' min</div>':'')
-    +(r.tipos_confec&&r.tipos_confec.length?'<div class="pill">\uD83C\uDF73 '+r.tipos_confec.join(' + ')+'</div>':'')
-    +(r.dificuldade?'<div class="pill">\uD83D\uDCCA '+r.dificuldade+'</div>':'')
-    +'<div class="pill">\uD83D\uDCC1 '+r.categoria+'</div>'
+    +(r.cliente?'<div class="pill c"><span style="font-size:10px;font-weight:600;opacity:.7">Cliente:</span> '+r.cliente+'</div>':'')
+    +(r.doses?'<div class="pill"><span style="font-size:10px;font-weight:600;opacity:.7">Doses:</span> '+r.doses+'</div>':'')
+    +(r.tempo?'<div class="pill"><span style="font-size:10px;font-weight:600;opacity:.7">Tempo:</span> '+r.tempo+' min</div>':'')
+    +(r.tipos_confec&&r.tipos_confec.length?'<div class="pill"><span style="font-size:10px;font-weight:600;opacity:.7">Confeção:</span> '+r.tipos_confec.join(' + ')+'</div>':'')
+    +(r.dificuldade?'<div class="pill"><span style="font-size:10px;font-weight:600;opacity:.7">Dificuldade:</span> '+r.dificuldade+'</div>':'')
+    +'<div class="pill"><span style="font-size:10px;font-weight:600;opacity:.7">Categoria:</span> '+r.categoria+'</div>'
     +'</div>'
     +'<div class="xbtns">'
     +'<button class="btnx bsav" onclick="salvarReceita('+r.id+')">💾 Guardar</button>'
@@ -726,7 +726,7 @@ function renderIngRow(rid,ing,i){
   var inpCls="iinp"+(ing.ai_ok?" ok":"");
   var safeName=(ing.nome||"").replace(/[<>"']/g,"");
   return '<tr id="ing-row-'+rid+'-'+i+'">'
-    +'<td><div style="display:flex;gap:4px;align-items:center">'
+    +'<td><div style="display:flex;gap:4px;align-items:center;justify-content:flex-start">'
     +'<input class="'+inpCls+'" id="ing-inp-'+rid+'-'+i+'" value="'+safeName+'" placeholder="Nome do ingrediente" onchange="updateIngNome('+rid+','+i+',this.value)">'
     +'<span class="print-val" style="font-size:12px">'+safeName+'</span>'
     +'<button class="srchbtn" onclick="pesquisarIngrediente('+rid+','+i+')" title="Pesquisar automaticamente">\uD83D\uDD0D</button>'
@@ -928,12 +928,11 @@ function renderTabNutricional(r){
       +'<div class="nc-lb">'+n.lbl+'</div>'
       +'<div class="nc-bw"><div class="nc-b" style="width:'+pct+'%;background:'+cor+'"></div></div>'
       +'<div class="nc-vd">'+pct+'% VD \u00b7 VDR '+vdr+n.unit+'</div>'
-      +(isAuto?'<div class="nc-ai">\uD83E\uDD16 auto</div>':'')
       +'</div>';
   }).join("");
 
   var autoInfo=temAuto?
-    '<div class="ok-b"><strong>\uD83E\uDD16 Calculado automaticamente</strong> \u2014 '+r.ingredientes.filter(function(i){return i.ai_ok;}).length+' ingrediente(s) pesquisado(s). Total \u00f7 '+doses+' doses.</div>'
+    '<div class="ok-b"><strong>Cálculo</strong> \u2014 '+r.ingredientes.filter(function(i){return i.ai_ok;}).length+' ingrediente(s) pesquisado(s). Total \u00f7 '+doses+' doses.</div>'
     :'<div class="info-b">\uD83D\uDCA1 Pesquisa os ingredientes com \uD83D\uDD0D para calcular automaticamente, ou preenche manualmente.</div>';
 
   return '<div class="tc'+(show?' active':'')+'"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">'
