@@ -60,6 +60,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#DFF0F9;color:var(--
 .btnx{padding:6px 13px;border-radius:6px;border:none;cursor:pointer;font-size:12px;font-weight:700;display:flex;align-items:center;gap:4px;transition:opacity .15s;}
 .btnx:hover{opacity:.82;}
 .bpdf{background:var(--vm);color:#fff;}
+.bsav{background:#2e7d32;color:#fff;}
 .bdel{background:var(--c4);color:var(--c2);border:1px solid var(--bd);}
 .tabs-bar{display:flex;border-bottom:2px solid var(--bd);padding:0 15px;overflow-x:auto;background:#fff;}
 .tab{padding:10px 13px;font-size:12px;font-weight:700;color:var(--c2);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:color .15s,border-color .15s;white-space:nowrap;}
@@ -599,7 +600,7 @@ function renderSbAlerg(){
 /* =========================================================
    FICHA PRINCIPAL
    ========================================================= */
-function selReceita(id){ rid=id; activeTab="ingredientes"; nFaixa="adulto"; renderSidebar(); renderFicha(); renderSbAlerg(); }
+function selReceita(id){ rid=parseInt(id)||id; activeTab="ingredientes"; nFaixa="adulto"; renderSidebar(); renderFicha(); renderSbAlerg(); }
 
 function renderFicha(){
   var r=receitas.find(function(x){return x.id===rid;}); if(!r)return;
@@ -621,9 +622,10 @@ function renderFicha(){
     +'<div class="pill">\uD83D\uDCC1 '+r.categoria+'</div>'
     +'</div>'
     +'<div class="xbtns">'
-    +'<button class="btnx bpdf" onclick="window.print()">\uD83D\uDDC8 Imprimir</button>'
-    +'<button class="btnx bpdf" onclick="window.print()">\uD83D\uDCD1 PDF</button>'
-    +'<button class="btnx bdel" onclick="delReceita(\'+r.id+\')">\uD83D\uDDD1 Eliminar</button>'
+    +'<button class="btnx bsav" onclick="guardarReceita(\'+r.id+\')">💾 Guardar</button>'
+    +'<button class="btnx bpdf" onclick="window.print()">🖨 Imprimir</button>'
+    +'<button class="btnx bpdf" onclick="window.print()">📑 PDF</button>'
+    +'<button class="btnx bdel" onclick="delReceita(\'+r.id+\')">🗑 Eliminar</button>'
     +'</div>'
     +'</div></div>'
     +'<div><div class="rstat '+(nAlerg>0?"al":"ok")+'">'+(nAlerg>0?"\u26A0 "+nAlerg+" alerg.":"\u2713 Sem alerg\u00e9nios")+'</div></div>'
@@ -768,6 +770,7 @@ function addIngrediente(rid){
 }
 
 function delIngrediente(rid,i){
+  rid=parseInt(rid)||rid; i=parseInt(i)||0;
   var r=receitas.find(function(x){return x.id===rid;});
   r.ingredientes.splice(i,1);
   recalcAlerg(r); recalcNutri(r); salvar(); renderFicha(); renderSbAlerg();
@@ -789,6 +792,7 @@ function updateIngField(rid,i,campo,val){
    PESQUISA AUTOMÁTICA VIA CLAUDE API
    ========================================================= */
 async function pesquisarIngrediente(rid,i){
+  rid=parseInt(rid)||rid; i=parseInt(i)||0;
   var r=receitas.find(function(x){return x.id===rid;});
   var ing=r.ingredientes[i];
   var nome=(ing.nome||document.getElementById("ing-inp-"+rid+"-"+i).value||"").trim();
@@ -1036,6 +1040,13 @@ function editCampo(rid,campo,val){
 // editCampo com rerenderização (para campos que afectam o layout)
 function editCampoR(rid,campo,val){
   editCampo(rid,campo,val); renderFicha();
+}
+
+function guardarReceita(rid){
+  rid=parseInt(rid)||rid;
+  salvar();
+  var btn=document.querySelector(".bsav");
+  if(btn){var orig=btn.innerHTML;btn.innerHTML="✓ Guardado!";btn.style.background="#1b5e20";setTimeout(function(){btn.innerHTML=orig;btn.style.background="";},1500);}
 }
 
 function delReceita(rid){
