@@ -996,10 +996,12 @@ function exportWord(id){
     +"<h2>Conserva\u00e7\u00e3o</h2><table><tr><th>Campo</th><th>Valor</th></tr>"+(conservObj.lbl?"<tr><td>Instru\u00e7\u00f5es</td><td>"+conservObj.lbl+"</td></tr>":"")+(conservObj.desc?"<tr><td>Descri\u00e7\u00e3o</td><td>"+conservObj.desc+"</td></tr>":"")+(r.validade?"<tr><td>Prazo de Validade</td><td>"+r.validade+"</td></tr>":"")+(r.notas_conservacao?"<tr><td>Notas</td><td>"+r.notas_conservacao+"</td></tr>":"")+"</table>"
     +"</body></html>";
   var blob=new Blob(["\ufeff"+html],{type:"application/msword;charset=utf-8"});
+  var url=URL.createObjectURL(blob);
   var a=document.createElement("a");
-  a.href=URL.createObjectURL(blob);
+  a.href=url;
   a.download=(r.nome||"receita").replace(/[^\w\-]/g,"_")+".doc";
   document.body.appendChild(a);a.click();document.body.removeChild(a);
+  setTimeout(function(){URL.revokeObjectURL(url);},1000);
 }
 function exportPdf(id){
   var r=receitas.find(function(x){return x.id===id;}); if(!r)return;
