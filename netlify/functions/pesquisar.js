@@ -20,18 +20,28 @@ exports.handler = async function(event) {
 
   const prompt =
     `Analisa o ingrediente alimentar: "${nome}"\n\n` +
-    `Responde APENAS com JSON puro, sem markdown:\n` +
-    `{"grupo_nova":"1","alergenios":[],"vestigios":[],"nutrientes_100g":{"kcal":0,"carb":0,"acucares":0,"gorduras":0,"saturadas":0,"proteinas":0,"sal":0,"fibra":0},"nome_pt":"${nome}"}\n\n` +
-    `grupo_nova: "1"=não processado(frutas/vegetais frescos,carne fresca,ovos,leguminosas), ` +
-    `"2"=minimamente processado(congelados simples,leite pasteurizado,farinhas,arroz,azeite,sal), ` +
-    `"3"=processado(queijo,pão,conservas,fumados,enlatados,vinho,enchidos), ` +
-    `"4"=ultra-processado(refrigerantes,nuggets,bolachas industriais,salsichas).\n` +
-    `alergenios e vestigios: IDs dos 14 UE: gluten,crustaceos,ovos,peixe,amendoins,soja,leite,frutos_c,aipo,mostarda,sesamo,sulfitos,tremocos,moluscos.\n` +
-    `nutrientes_100g: valores médios por 100g. Números com ponto decimal.`;
+    `Responde APENAS com JSON puro, sem markdown, sem texto extra:\n` +
+    `{\n` +
+    `  "grupo_nova": "1",\n` +
+    `  "alergenios": ["leite","gluten"],\n` +
+    `  "vestigios": ["frutos_c"],\n` +
+    `  "nutrientes_100g": {\n` +
+    `    "kcal": 52, "carb": 11.4, "acucares": 10.2,\n` +
+    `    "gorduras": 0.2, "saturadas": 0.03,\n` +
+    `    "proteinas": 0.3, "sal": 0.001, "fibra": 2.4\n` +
+    `  },\n` +
+    `  "nome_pt": "${nome}"\n` +
+    `}\n\n` +
+    `grupo_nova: "1"=nao processado (frutas frescas, vegetais crus, carne fresca, ovos, leguminosas secas), ` +
+    `"2"=minimamente processado (congelados simples, leite pasteurizado, farinhas, arroz, azeite, sal, mel), ` +
+    `"3"=processado (queijo, pao, conservas, fumados, enlatados, vinho, enchidos), ` +
+    `"4"=ultra-processado (refrigerantes, nuggets, bolachas industriais, salsichas).\n` +
+    `alergenios e vestigios: usa apenas estes IDs: gluten, crustaceos, ovos, peixe, amendoins, soja, leite, frutos_c, aipo, mostarda, sesamo, sulfitos, tremocos, moluscos.\n` +
+    `nutrientes_100g: valores medios por 100g. Todos os 8 campos sao obrigatorios: kcal, carb, acucares, gorduras, saturadas, proteinas, sal, fibra. Usa numeros com ponto decimal.`;
 
   const payload = JSON.stringify({
     model: "claude-sonnet-4-6",
-    max_tokens: 400,
+    max_tokens: 600,
     messages: [{ role: "user", content: prompt }]
   });
 
@@ -65,7 +75,15 @@ exports.handler = async function(event) {
     const apiData = JSON.parse(result.body);
     const txt = apiData.content?.[0]?.text || "";
     const clean = txt.replace(/```[\w]*\n?/g, "").trim();
-    const parsed = JSON.parse(clean);
+    const jsonMatch = clean.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) return { statusCode: 502, body: "Resposta inesperada: " + clean.substring(0, 100) };
+    const parsed = JSON.parse(jsonMatch[0]);
+
+    const nutri = parsed.nutrientes_100g || {};
+    ["kcal","carb","acucares","gorduras","saturadas","proteinas","sal","fibra"].forEach(k => {
+      if (nutri[k] === undefined) nutri[k] = 0;
+    });
+    parsed.nutrientes_100g = nutri;
 
     return {
       statusCode: 200,
