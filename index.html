@@ -1119,7 +1119,7 @@ function gerarTabelaAlerg(){
     {id:"moluscos",   nome:"Moluscos"}
   ];
 
-  var thStyle="border:1px solid #ccc;padding:4px 2px;font-size:8px;text-align:center;background:#E6F4FB;color:#006FA8;font-weight:700;writing-mode:vertical-rl;transform:rotate(180deg);height:85px;vertical-align:bottom;white-space:nowrap;width:26px;";
+  var thStyle="border:1px solid #ccc;padding:4px 2px;font-size:8px;text-align:center;background:#E6F4FB;color:#006FA8;font-weight:700;writing-mode:vertical-rl;transform:rotate(180deg);height:85px;vertical-align:middle;white-space:nowrap;width:26px;";
   var tdStyle="border:1px solid #ccc;padding:4px 2px;font-size:12px;text-align:center;vertical-align:middle;width:26px;";
   var tdNomeStyle="border:1px solid #ccc;padding:5px 8px;font-size:10px;text-align:left;font-weight:500;";
 
@@ -1127,19 +1127,24 @@ function gerarTabelaAlerg(){
     return '<th style="'+thStyle+'">'+a.nome+'</th>';
   }).join("");
 
-  var rows=lista.map(function(r){
-    var cols=ALERG_COLS.map(function(a){
-      var v=r.alergenios[a.id]||"nao";
-      var vestigios=r.vestigios||[];
-      var isVest=vestigios.indexOf(a.id)>=0;
-      var sym="";
-      if(v==="sim") sym='<span style="color:#C0392B;font-weight:700;font-size:13px">+</span>';
-      else if(v==="possivel"||isVest) sym='<span style="color:#EA831A;font-weight:700;font-size:13px">?</span>';
-      return '<td style="'+tdStyle+'">'+sym+'</td>';
-    }).join("");
-    var secao=r.seccao&&r.seccao!=="Ementa Geral"?r.seccao:"";
-    return '<tr><td style="'+tdNomeStyle+'">'+r.nome+(secao?' <span style="font-size:8px;color:#888;font-weight:400">('+secao+')</span>':'')+'</td>'+cols+'</tr>';
-  }).join("");
+  var cats=[];
+  lista.forEach(function(r){if(cats.indexOf(r.categoria)<0)cats.push(r.categoria);});
+  var rows="";
+  cats.forEach(function(cat){
+    rows+='<tr><td colspan="'+(ALERG_COLS.length+1)+'" style="background:#006FA8;color:#fff;font-size:9px;font-weight:700;padding:4px 8px;text-transform:uppercase;letter-spacing:.5px;border:1px solid #005a8e;">'+cat+'</td></tr>';
+    lista.filter(function(r){return r.categoria===cat;}).forEach(function(r){
+      var cols=ALERG_COLS.map(function(a){
+        var v=r.alergenios[a.id]||"nao";
+        var vestigios=r.vestigios||[];
+        var isVest=vestigios.indexOf(a.id)>=0;
+        var sym="";
+        if(v==="sim") sym='<span style="color:#C0392B;font-weight:700;font-size:13px">+</span>';
+        else if(v==="possivel"||isVest) sym='<span style="color:#EA831A;font-weight:700;font-size:13px">?</span>';
+        return '<td style="'+tdStyle+'">'+sym+'</td>';
+      }).join("");
+      rows+='<tr><td style="'+tdNomeStyle+'">'+r.nome+'</td>'+cols+'</tr>';
+    });
+  });
 
   var hoje=new Date().toLocaleDateString('pt-PT');
 
