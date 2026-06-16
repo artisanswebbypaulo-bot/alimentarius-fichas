@@ -604,8 +604,8 @@ function renderSbAlerg(){
   if(!sim.length&&!pos.length){el.style.display="none";return;}
   el.style.display="";
   document.getElementById("sb-alerg-grid").innerHTML=
-    sim.map(function(a){return '<div class="agc sim">'+a.ico+'<br>'+a.nome+'</div>';}).join("")+
-    pos.map(function(a){return '<div class="agc possivel">'+a.ico+'<br>'+a.nome+'</div>';}).join("");
+    sim.map(function(a){return '<div class="agc sim">'+a.nome+'</div>';}).join("")+
+    pos.map(function(a){return '<div class="agc possivel">'+a.nome+'</div>';}).join("");
 }
 
 /* =========================================================
@@ -726,7 +726,7 @@ function renderIngRow(rid,ing,i){
   if(ing.alergenios_detectados&&ing.alergenios_detectados.length){
     alrgStr=ing.alergenios_detectados.map(function(aid){
       var a=ALERG.find(function(x){return x.id===aid;});
-      return '<span style="background:var(--vm-bg);color:var(--vm);border-radius:3px;padding:1px 5px;font-size:9px;font-weight:700;margin:1px;display:inline-block">'+(a?a.ico+' '+a.nome:aid)+'</span>';
+      return '<span style="background:var(--vm-bg);color:var(--vm);border-radius:3px;padding:1px 5px;font-size:9px;font-weight:700;margin:1px;display:inline-block">'+(a?a.nome:aid)+'</span>';
     }).join("");
   }
   var grupoTag='<span style="color:var(--c3);font-size:11px">\u2014</span>';
