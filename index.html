@@ -124,6 +124,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#DFF0F9;color:var(--
 .print-confec{display:none;}
 .print-ta{display:none;}
 .print-val{display:none;font-size:15px;font-weight:500;color:var(--c1);}
+.only-print{display:none;}
 .srchbtn{padding:4px 7px;background:var(--az-bg);border:1px solid var(--az-b);border-radius:4px;cursor:pointer;font-size:13px;flex-shrink:0;}
 .parea{width:100%;min-height:75px;border:1.5px solid var(--bd);border-radius:7px;padding:9px;font-size:13px;font-family:inherit;resize:vertical;outline:none;}
 .parea:focus{border-color:var(--az);}
@@ -173,6 +174,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#DFF0F9;color:var(--
   /* ── Mostrar valores de impressão ── */
   .print-val{display:inline!important;font-size:12px;font-weight:600;color:#1B2A35;}
   td .print-val{display:table-cell!important;}
+  .only-print{display:inline!important;font-size:12px;font-weight:500;color:#1B2A35;}
   .print-confec{display:block!important;font-size:13px;font-weight:600;color:#1B2A35;margin-bottom:6px;}
   .print-ta{display:block!important;font-size:12px;white-space:pre-wrap;border:1px solid #e0e0e0;border-radius:4px;padding:7px;margin-top:4px;}
 
@@ -251,6 +253,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#DFF0F9;color:var(--
   </div>
   <div class="tbr">
     <button class="btnt btn-sec" onclick="abrirClientes()">&#128101; Clientes</button>
+    <button class="btnt btn-sec" onclick="abrirTabelaAlerg()">&#128203; Tabela Alerg&#233;nios</button>
     <button class="btnt btn-nova" onclick="abrirModalReceita()">+ Nova Receita</button>
     <button class="btnt btn-sec" onclick="window.print()">&#128424;</button>
   </div>
@@ -729,12 +732,12 @@ function renderIngRow(rid,ing,i){
     +'<td><div style="display:flex;gap:4px;align-items:center;justify-content:flex-start">'
     +'<input class="'+inpCls+' no-print" id="ing-inp-'+rid+'-'+i+'" value="'+safeName+'" placeholder="Nome do ingrediente" onchange="updateIngNome('+rid+','+i+',this.value)">'
     +'<button class="srchbtn no-print" onclick="pesquisarIngrediente('+rid+','+i+')" title="Pesquisar automaticamente">\uD83D\uDD0D</button>'
-    +'<span style="font-size:13px">'+safeName+'</span>'
+    +'<span class="only-print">'+safeName+'</span>'
     +'</div></td>'
-    +'<td><input type="number" value="'+(ing.qty||100)+'" min="0" step="1" onchange="updateIngField('+rid+','+i+',\'qty\',parseFloat(this.value)||0)" style="width:60px"><span class="print-val">'+(ing.qty||100)+'</span></td>'
-    +'<td><select onchange="updateIngField('+rid+','+i+',\'unidade\',this.value)">'
+    +'<td><input type="number" class="no-print" value="'+(ing.qty||100)+'" min="0" step="1" onchange="updateIngField('+rid+','+i+',\'qty\',parseFloat(this.value)||0)" style="width:60px"><span class="only-print">'+(ing.qty||100)+'</span></td>'
+    +'<td><select class="no-print" onchange="updateIngField('+rid+','+i+',\'unidade\',this.value)">'
     +["g","kg","ml","L","un","c.s.","c.c.","a gosto"].map(function(u){return '<option'+(ing.unidade===u?' selected':'')+'>'+u+'</option>';}).join("")
-    +'</select><span class="print-val">'+(ing.unidade||'g')+'</span></td>'
+    +'</select><span class="only-print">'+(ing.unidade||'g')+'</span></td>'
     +'<td>'+grupoTag+'</td>'
     +'<td>'+alrgStr+'</td>'
     +'<td class="no-print"><button class="delbtn" onclick="delIngrediente('+rid+','+i+')">✕</button></td>'
@@ -1075,6 +1078,124 @@ function exportPdf(id){ window.print();
 renderSidebar();
 if(receitas.length>0) selReceita(receitas[0].id);
 
+/* =========================================================
+   TABELA DE ALERGÉNIOS
+   ========================================================= */
+function abrirTabelaAlerg(){
+  var s=document.getElementById("tab-cli-sel");
+  s.innerHTML='<option value="">Todos os clientes</option>'
+    +clientes.map(function(c){return '<option value="'+c.nome+'">'+c.nome+'</option>';}).join("");
+  document.getElementById("tab-titulo").value="";
+  document.getElementById("mo-tabela").style.display="flex";
+}
+function fecharTabelaAlerg(){
+  document.getElementById("mo-tabela").style.display="none";
+}
+
+function gerarTabelaAlerg(){
+  var cliFilter=document.getElementById("tab-cli-sel").value;
+  var titulo=document.getElementById("tab-titulo").value.trim();
+  var lista=receitas.filter(function(r){
+    return cliFilter===""||r.cliente===cliFilter;
+  });
+  if(!lista.length){alert("Sem receitas para os filtros seleccionados.");return;}
+
+  var ALERG_COLS=[
+    {id:"gluten",     nome:"Glúten"},
+    {id:"crustaceos", nome:"Crustáceos"},
+    {id:"ovos",       nome:"Ovos"},
+    {id:"peixe",      nome:"Peixe"},
+    {id:"amendoins",  nome:"Amendoins"},
+    {id:"soja",       nome:"Soja"},
+    {id:"leite",      nome:"Leite/Lácteos"},
+    {id:"frutos_c",   nome:"Frutas Casca Rija"},
+    {id:"aipo",       nome:"Aipo"},
+    {id:"mostarda",   nome:"Mostarda"},
+    {id:"sesamo",     nome:"Sésamo"},
+    {id:"sulfitos",   nome:"Sulfitos/SO₂"},
+    {id:"tremocos",   nome:"Tremoços"},
+    {id:"moluscos",   nome:"Moluscos"}
+  ];
+
+  var thStyle="border:1px solid #ccc;padding:4px 3px;font-size:9px;text-align:center;background:#E6F4FB;color:#006FA8;font-weight:700;writing-mode:vertical-rl;transform:rotate(180deg);height:90px;vertical-align:bottom;white-space:nowrap;";
+  var tdStyle="border:1px solid #ccc;padding:5px 4px;font-size:11px;text-align:center;";
+  var tdNomeStyle="border:1px solid #ccc;padding:5px 8px;font-size:11px;text-align:left;font-weight:500;";
+
+  var thCols=ALERG_COLS.map(function(a){
+    return '<th style="'+thStyle+'">'+a.nome+'</th>';
+  }).join("");
+
+  var rows=lista.map(function(r){
+    var cols=ALERG_COLS.map(function(a){
+      var v=r.alergenios[a.id]||"nao";
+      var vestigios=r.vestigios||[];
+      var isVest=vestigios.indexOf(a.id)>=0;
+      var sym="";
+      if(v==="sim") sym='<span style="color:#C0392B;font-weight:700;font-size:13px">+</span>';
+      else if(v==="possivel"||isVest) sym='<span style="color:#EA831A;font-weight:700;font-size:13px">?</span>';
+      return '<td style="'+tdStyle+'">'+sym+'</td>';
+    }).join("");
+    var secao=r.seccao&&r.seccao!=="Ementa Geral"?r.seccao:"";
+    return '<tr><td style="'+tdNomeStyle+'">'+r.nome+(secao?' <span style="font-size:9px;color:#888;font-weight:400">('+secao+')</span>':'')+'</td>'+cols+'</tr>';
+  }).join("");
+
+  var hoje=new Date().toLocaleDateString('pt-PT');
+  var html='<!DOCTYPE html><html lang="pt"><head><meta charset="UTF-8">'
+    +'<title>Tabela Alergénios</title>'
+    +'<style>'
+    +'body{font-family:Arial,sans-serif;font-size:11px;margin:15mm;color:#1B2A35;}'
+    +'h1{font-size:14px;text-align:center;margin-bottom:2px;}'
+    +'h2{font-size:12px;text-align:center;font-weight:400;margin-bottom:4px;color:#444;}'
+    +'.subtit{text-align:center;font-size:10px;color:#666;margin-bottom:12px;}'
+    +'table{border-collapse:collapse;width:100%;}'
+    +'.legenda{margin-top:10px;font-size:9px;color:#555;}'
+    +'@media print{body{margin:10mm;}@page{size:A4 landscape;margin:10mm;}}'
+    +'</style></head><body>'
+    +'<div style="text-align:right;font-size:9px;color:#888;margin-bottom:6px">Data de impressão: '+hoje+'</div>'
+    +'<h1>TABELA DE ALERGIAS E INTOLERÂNCIAS ALIMENTARES</h1>'
+    +(titulo?'<h2>'+titulo+'</h2>':'')
+    +'<div class="subtit">+ Contém &nbsp;&nbsp; ? Pode conter</div>'
+    +'<table>'
+    +'<thead><tr><th style="border:1px solid #ccc;padding:5px 8px;font-size:10px;text-align:left;background:#E6F4FB;color:#006FA8;font-weight:700;min-width:140px">Prato / Receita</th>'
+    +thCols+'</tr></thead>'
+    +'<tbody>'+rows+'</tbody>'
+    +'</table>'
+    +'<div class="legenda"><strong>Notas:</strong> + Contém &nbsp; ? Pode conter &nbsp; Em branco: Ausente<br>'
+    +'Esta informação é calculada com base nas fichas técnicas e pode estar sujeita a alterações.</div>'
+    +'</body></html>';
+
+  var blob=new Blob([html],{type:'text/html;charset=utf-8'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;
+  a.target='_blank';
+  a.click();
+  setTimeout(function(){URL.revokeObjectURL(url);},5000);
+  fecharTabelaAlerg();
+}
+
 </script>
+<!-- MODAL TABELA ALERGÉNIOS -->
+<div class="mo" id="mo-tabela" style="display:none">
+  <div class="mdl" style="max-width:420px">
+    <div class="mh"><h2>&#128203; Tabela de Alerg&#233;nios</h2><button class="mclose" onclick="fecharTabelaAlerg()">&#10005;</button></div>
+    <div class="mc">
+      <div class="fr"><label>Filtrar por Cliente</label>
+        <select id="tab-cli-sel">
+          <option value="">Todos os clientes</option>
+        </select>
+      </div>
+      <div class="fr"><label>T&#237;tulo do Estabelecimento</label>
+        <input id="tab-titulo" placeholder="Ex: Restaurante O&#225;sis">
+      </div>
+      <p style="font-size:12px;color:var(--c2);line-height:1.5">Gera uma tabela com todas as receitas e os respectivos alerg&#233;nios, pronta a imprimir.</p>
+    </div>
+    <div class="mf">
+      <button class="btn btn-s" onclick="fecharTabelaAlerg()">Cancelar</button>
+      <button class="btn btn-p" onclick="gerarTabelaAlerg()">&#128444; Gerar e Imprimir</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
