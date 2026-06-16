@@ -868,26 +868,27 @@ function renderTabAlergenios(r){
   var naoLst=ALERG.filter(function(a){return r.alergenios[a.id]!=="sim"&&(r.vestigios||[]).indexOf(a.id)<0;});
   var autoBox="";
   if(simLst.length||vesLst.length){
-    autoBox='<div class="ok-b" style="margin-bottom:12px"><strong>\uD83E\uDD16 Detectado automaticamente pelos ingredientes:</strong><br>'
-      +(simLst.length?'<span style="color:var(--vm)">Presente: '+simLst.map(function(a){return a.ico+" "+a.nome;}).join(", ")+'</span>':'')
+    autoBox='<div class="ok-b" style="margin-bottom:12px"><strong>Detectado automaticamente pelos ingredientes:</strong><br>'
+      +(simLst.length?'<span style="color:var(--vm)">Presente: '+simLst.map(function(a){return a.nome;}).join(", ")+'</span>':'')
       +(simLst.length&&vesLst.length?"<br>":"")
-      +(vesLst.length?'<span style="color:var(--la-d)">Pode conter: '+vesLst.map(function(a){return a.ico+" "+a.nome;}).join(", ")+'</span>':'')
+      +(vesLst.length?'<span style="color:var(--la-d)">Pode conter: '+vesLst.map(function(a){return a.nome;}).join(", ")+'</span>':'')
       +'</div>';
   }
-  function makeChips(list, estado){
+  function makeChips(list,estado){
     return list.map(function(a){
-      return '<div class="afc '+estado+'" onclick="toggleAlerg('+r.id+',\''+a.id+'\')">'
-        +'<span class="ico">'+a.ico+'</span><span class="nm">'+a.nome+'</span></div>';
-    }).join("");
+      return '<div class="afc '+estado+'" onclick="toggleAlerg('+r.id+',\''+a.id+'\')"><span class="nm">'+a.nome+'</span></div>';    }).join("");
   }
   var sPres=simLst.length?makeChips(simLst,"sim"):'<div style="color:var(--c3);font-size:11px;padding:6px">Nenhum</div>';
   var sPode=vesLst.length?makeChips(vesLst,"possivel"):'<div style="color:var(--c3);font-size:11px;padding:6px">Nenhum</div>';
   var sAus=naoLst.length?makeChips(naoLst,"nao"):'<div style="color:var(--c3);font-size:11px;padding:6px">Nenhum</div>';
-  return '<div class="tc'+(show?' active':'')+'">'
-    +autoBox
-    +'<div style="margin-bottom:16px">'    +'<div class="stit" style="color:var(--vm)">Presente (declara\u00e7\u00e3o obrigat\u00f3ria)</div>'    +'<div class="af-grid" style="margin-bottom:0">'+sPres+'</div></div>'    +'<div style="margin-bottom:16px">'    +'<div class="stit" style="color:var(--la-d)">Pode conter (contamina\u00e7\u00e3o cruzada)  </div>'    +'<div class="af-grid" style="margin-bottom:0">'+sPode+'</div></div>'    +'<div>'    +'<div class="stit" style="color:var(--vd)">Ausente</div>'    +'<div class="af-grid" style="margin-bottom:0">'+sAus+'</div></div>'    +'<div style="margin-top:10px;font-size:11px;color:var(--c2)" class="no-print">Clica em qualquer alerg\u00e9nio para alterar o estado: Ausente \u2192 Presente \u2192 Pode conter \u2192 Ausente</div>'    +'<div class="info-b" style="margin-top:10px">\u26A0 <strong>Obriga\u00e7\u00e3o Legal:</strong> Reg. (UE) 1169/2011 e DL 26/2016 \u2014 14 alerg\u00e9nios de declara\u00e7\u00e3o obrigat\u00f3ria.</div>'    +'</div>';
+  return '<div class="tc'+(show?' active':'')+'">'+autoBox
+    +'<div style="margin-bottom:16px"><div class="stit" style="color:var(--vm)">Presente (declaração obrigatória)</div><div class="af-grid" style="margin-bottom:0">'+sPres+'</div></div>'
+    +'<div style="margin-bottom:16px"><div class="stit" style="color:var(--la-d)">Pode conter (contaminação cruzada)</div><div class="af-grid" style="margin-bottom:0">'+sPode+'</div></div>'
+    +'<div><div class="stit" style="color:var(--vd)">Ausente</div><div class="af-grid" style="margin-bottom:0">'+sAus+'</div></div>'
+    +'<div style="margin-top:10px;font-size:11px;color:var(--c2)" class="no-print">Clica em qualquer alergénio para alterar o estado: Ausente → Presente → Pode conter → Ausente</div>'
+    +'<div class="info-b" style="margin-top:10px">⚠ <strong>Obrigação Legal:</strong> Reg. (UE) 1169/2011 e DL 26/2016 — 14 alergénios de declaração obrigatória.</div>'
+    +'</div>';
 }
-
 function toggleAlerg(rid,aid){
   var r=receitas.find(function(x){return x.id===rid;});
   var cur=r.alergenios[aid]||"nao";
@@ -1122,9 +1123,9 @@ function gerarTabelaAlerg(){
     {id:"moluscos",   nome:"Moluscos"}
   ];
 
-  var thStyle="border:1px solid #ccc;padding:4px 2px;font-size:8px;text-align:center;background:#E6F4FB;color:#006FA8;font-weight:700;writing-mode:vertical-rl;transform:rotate(180deg);height:85px;vertical-align:middle;white-space:nowrap;width:26px;";
+  var thStyle="border:1px solid #ccc;padding:4px 2px;font-size:10px;text-align:center;background:#E6F4FB;color:#006FA8;font-weight:700;writing-mode:vertical-rl;transform:rotate(180deg);height:85px;vertical-align:middle;white-space:nowrap;width:26px;";
   var tdStyle="border:1px solid #ccc;padding:4px 2px;font-size:12px;text-align:center;vertical-align:middle;width:26px;";
-  var tdNomeStyle="border:1px solid #ccc;padding:5px 8px;font-size:10px;text-align:left;font-weight:500;";
+  var tdNomeStyle="border:1px solid #ccc;padding:5px 8px;font-size:12px;text-align:left;font-weight:500;";
 
   var thCols=ALERG_COLS.map(function(a){
     return '<th style="'+thStyle+'">'+a.nome+'</th>';
@@ -1141,8 +1142,8 @@ function gerarTabelaAlerg(){
         var vestigios=r.vestigios||[];
         var isVest=vestigios.indexOf(a.id)>=0;
         var sym="";
-        if(v==="sim") sym='<span style="color:#C0392B;font-weight:700;font-size:13px">+</span>';
-        else if(v==="possivel"||isVest) sym='<span style="color:#EA831A;font-weight:700;font-size:13px">△</span>';
+        if(v==="sim") sym='<span style="color:#C0392B;font-weight:700;font-size:14px">+</span>';
+        else if(v==="possivel"||isVest) sym='<span style="color:#EA831A;font-weight:700;font-size:14px">△</span>';
         return '<td style="'+tdStyle+'">'+sym+'</td>';
       }).join("");
       rows+='<tr><td style="'+tdNomeStyle+'">'+r.nome+'</td>'+cols+'</tr>';
@@ -1167,8 +1168,8 @@ function gerarTabelaAlerg(){
   var html='<!DOCTYPE html><html lang="pt"><head><meta charset="UTF-8">'
     +'<title>Tabela Alergénios</title>'
     +'<style>'
-    +'body{font-family:Arial,sans-serif;font-size:10px;margin:12mm 10mm;color:#1B2A35;}'
-    +'h1{font-size:13px;text-align:center;margin-bottom:3px;font-weight:700;}'
+    +'body{font-family:Arial,sans-serif;font-size:12px;margin:12mm 10mm;color:#1B2A35;}'
+    +'h1{font-size:14px;text-align:center;margin-bottom:3px;font-weight:700;}'
     +'h2{font-size:12px;text-align:center;font-weight:700;margin-bottom:2px;color:#1B2A35;}'
     +'.subtit{text-align:center;font-size:9px;color:#555;margin-bottom:10px;border-top:1px solid #ddd;padding-top:6px;margin-top:6px;}'
     +'table{border-collapse:collapse;width:100%;table-layout:fixed;}'
