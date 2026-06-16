@@ -1142,7 +1142,7 @@ function gerarTabelaAlerg(){
         var isVest=vestigios.indexOf(a.id)>=0;
         var sym="";
         if(v==="sim") sym='<span style="color:#C0392B;font-weight:700;font-size:13px">+</span>';
-        else if(v==="possivel"||isVest) sym='<span style="color:#EA831A;font-weight:700;font-size:13px">?</span>';
+        else if(v==="possivel"||isVest) sym='<span style="color:#EA831A;font-weight:700;font-size:13px">△</span>';
         return '<td style="'+tdStyle+'">'+sym+'</td>';
       }).join("");
       rows+='<tr><td style="'+tdNomeStyle+'">'+r.nome+'</td>'+cols+'</tr>';
@@ -1190,7 +1190,7 @@ function gerarTabelaAlerg(){
     +thCols+'</tr></thead>'
     +'<tbody>'+rows+'</tbody>'
     +'</table>'
-    +'<div class="legenda"><strong>Notas:</strong> + Contém &nbsp; ? Pode conter &nbsp; Em branco: Ausente<br>'
+    +'<div class="legenda"><strong>Notas:</strong> + Contém &nbsp; △ Pode conter &nbsp; Em branco: Ausente<br>'
     +'Esta informação é calculada com base nas fichas técnicas e pode estar sujeita a alterações.</div>'
     +'</body></html>';
 
