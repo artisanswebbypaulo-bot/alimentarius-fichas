@@ -1100,6 +1100,8 @@ function gerarTabelaAlerg(){
   });
   if(!lista.length){alert("Sem receitas para os filtros seleccionados.");return;}
 
+  var cliObj=cliFilter?clientes.find(function(c){return c.nome===cliFilter;}):null;
+
   var ALERG_COLS=[
     {id:"gluten",     nome:"Glúten"},
     {id:"crustaceos", nome:"Crustáceos"},
@@ -1112,14 +1114,14 @@ function gerarTabelaAlerg(){
     {id:"aipo",       nome:"Aipo"},
     {id:"mostarda",   nome:"Mostarda"},
     {id:"sesamo",     nome:"Sésamo"},
-    {id:"sulfitos",   nome:"Sulfitos/SO₂"},
+    {id:"sulfitos",   nome:"Sulfitos/SO\u2082"},
     {id:"tremocos",   nome:"Tremoços"},
     {id:"moluscos",   nome:"Moluscos"}
   ];
 
-  var thStyle="border:1px solid #ccc;padding:4px 3px;font-size:9px;text-align:center;background:#E6F4FB;color:#006FA8;font-weight:700;writing-mode:vertical-rl;transform:rotate(180deg);height:90px;vertical-align:bottom;white-space:nowrap;";
-  var tdStyle="border:1px solid #ccc;padding:5px 4px;font-size:11px;text-align:center;";
-  var tdNomeStyle="border:1px solid #ccc;padding:5px 8px;font-size:11px;text-align:left;font-weight:500;";
+  var thStyle="border:1px solid #ccc;padding:4px 2px;font-size:8px;text-align:center;background:#E6F4FB;color:#006FA8;font-weight:700;writing-mode:vertical-rl;transform:rotate(180deg);height:85px;vertical-align:bottom;white-space:nowrap;width:26px;";
+  var tdStyle="border:1px solid #ccc;padding:4px 2px;font-size:12px;text-align:center;vertical-align:middle;width:26px;";
+  var tdNomeStyle="border:1px solid #ccc;padding:5px 8px;font-size:10px;text-align:left;font-weight:500;";
 
   var thCols=ALERG_COLS.map(function(a){
     return '<th style="'+thStyle+'">'+a.nome+'</th>';
@@ -1136,27 +1138,42 @@ function gerarTabelaAlerg(){
       return '<td style="'+tdStyle+'">'+sym+'</td>';
     }).join("");
     var secao=r.seccao&&r.seccao!=="Ementa Geral"?r.seccao:"";
-    return '<tr><td style="'+tdNomeStyle+'">'+r.nome+(secao?' <span style="font-size:9px;color:#888;font-weight:400">('+secao+')</span>':'')+'</td>'+cols+'</tr>';
+    return '<tr><td style="'+tdNomeStyle+'">'+r.nome+(secao?' <span style="font-size:8px;color:#888;font-weight:400">('+secao+')</span>':'')+'</td>'+cols+'</tr>';
   }).join("");
 
   var hoje=new Date().toLocaleDateString('pt-PT');
+
+  var cliBlock="";
+  if(cliObj){
+    cliBlock='<div style="text-align:center;font-size:10px;color:#444;margin-bottom:2px;">';
+    if(cliObj.morada) cliBlock+=cliObj.morada+(cliObj.local?', '+cliObj.local:'');
+    else if(cliObj.local) cliBlock+=cliObj.local;
+    if(cliObj.tel) cliBlock+=' &nbsp;|&nbsp; Tel: '+cliObj.tel;
+    if(cliObj.email) cliBlock+=' &nbsp;|&nbsp; '+cliObj.email;
+    cliBlock+='</div>';
+    if(cliObj.nif) cliBlock+='<div style="text-align:center;font-size:9px;color:#666;margin-bottom:4px;">NIF: '+cliObj.nif+'</div>';
+  }
+
   var html='<!DOCTYPE html><html lang="pt"><head><meta charset="UTF-8">'
     +'<title>Tabela Alergénios</title>'
     +'<style>'
-    +'body{font-family:Arial,sans-serif;font-size:11px;margin:15mm;color:#1B2A35;}'
-    +'h1{font-size:14px;text-align:center;margin-bottom:2px;}'
-    +'h2{font-size:12px;text-align:center;font-weight:400;margin-bottom:4px;color:#444;}'
-    +'.subtit{text-align:center;font-size:10px;color:#666;margin-bottom:12px;}'
-    +'table{border-collapse:collapse;width:100%;}'
-    +'.legenda{margin-top:10px;font-size:9px;color:#555;}'
-    +'@media print{body{margin:10mm;}@page{size:A4 landscape;margin:10mm;}}'
+    +'body{font-family:Arial,sans-serif;font-size:10px;margin:12mm 10mm;color:#1B2A35;}'
+    +'h1{font-size:13px;text-align:center;margin-bottom:3px;font-weight:700;}'
+    +'h2{font-size:12px;text-align:center;font-weight:700;margin-bottom:2px;color:#1B2A35;}'
+    +'.subtit{text-align:center;font-size:9px;color:#555;margin-bottom:10px;border-top:1px solid #ddd;padding-top:6px;margin-top:6px;}'
+    +'table{border-collapse:collapse;width:100%;table-layout:fixed;}'
+    +'.legenda{margin-top:8px;font-size:8px;color:#555;line-height:1.6;}'
+    +'tr:nth-child(even) td{background:#f7fbfd;}'
+    +'@media print{body{margin:8mm 8mm;}@page{size:A4 portrait;margin:8mm;}}'
     +'</style></head><body>'
-    +'<div style="text-align:right;font-size:9px;color:#888;margin-bottom:6px">Data de impressão: '+hoje+'</div>'
+    +'<div style="text-align:right;font-size:8px;color:#aaa;margin-bottom:8px">Data de impressão: '+hoje+'</div>'
     +'<h1>TABELA DE ALERGIAS E INTOLERÂNCIAS ALIMENTARES</h1>'
     +(titulo?'<h2>'+titulo+'</h2>':'')
-    +'<div class="subtit">+ Contém &nbsp;&nbsp; ? Pode conter</div>'
+    +cliBlock
+    +'<div class="subtit">+ Contém &nbsp;&nbsp; ? Pode conter &nbsp;&nbsp; Em branco: Ausente</div>'
     +'<table>'
-    +'<thead><tr><th style="border:1px solid #ccc;padding:5px 8px;font-size:10px;text-align:left;background:#E6F4FB;color:#006FA8;font-weight:700;min-width:140px">Prato / Receita</th>'
+    +'<thead><tr>'
+    +'<th style="border:1px solid #ccc;padding:5px 8px;font-size:9px;text-align:left;background:#E6F4FB;color:#006FA8;font-weight:700;">Prato / Receita</th>'
     +thCols+'</tr></thead>'
     +'<tbody>'+rows+'</tbody>'
     +'</table>'
