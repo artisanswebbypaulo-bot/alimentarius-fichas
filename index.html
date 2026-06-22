@@ -362,6 +362,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#DFF0F9;color:var(--
       <div class="fg">
         <div class="fr"><label>Nome / Empresa *</label><input id="c-nome" placeholder="Ex: Restaurante O&#225;sis"></div>
         <div class="fr"><label>NIF</label><input id="c-nif" placeholder="510 123 456"></div>
+        <div class="fr"><label>Nº Cliente</label><input id="c-num" placeholder="Ex: CLI-001"></div>
       </div>
       <div class="fg">
         <div class="fr"><label>Designa&#231;&#227;o Comercial</label><input id="c-designacao" placeholder="Ex: Unidade de Restaura&#231;&#227;o"></div>
@@ -490,7 +491,7 @@ function renderClist(){
   el.innerHTML=clientes.map(function(c){
     return '<div class="crow"><div><div style="font-weight:600">'+c.nome+'</div>'
       +'<div style="font-size:11px;color:var(--c2)">'
-      +[c.local,c.tel,c.email].filter(Boolean).join(" \u00b7 ")+'</div></div>'
+      +[(c.num?"Nº "+c.num:null),c.local,c.tel,c.email].filter(Boolean).join(" \u00b7 ")+'</div></div>'
       +'<button class="delbtn" onclick="delCliente('+c.id+')">✕</button></div>';
   }).join("");
 }
@@ -499,11 +500,12 @@ function addCliente(){
   var nome=document.getElementById("c-nome").value.trim();
   if(!nome){alert("Introduz o nome.");return;}
   clientes.push({id:Date.now(),nome:nome,nif:document.getElementById("c-nif").value.trim(),
+    num:document.getElementById("c-num").value.trim(),
     designacao:document.getElementById("c-designacao").value.trim(),
     morada:document.getElementById("c-morada").value.trim(),local:document.getElementById("c-local").value.trim(),
     tel:document.getElementById("c-tel").value.trim(),email:document.getElementById("c-email").value.trim()});
   salvar();
-  ["c-nome","c-nif","c-designacao","c-morada","c-local","c-tel","c-email"].forEach(function(id){document.getElementById(id).value="";});
+  ["c-nome","c-nif","c-num","c-designacao","c-morada","c-local","c-tel","c-email"].forEach(function(id){document.getElementById(id).value="";});
   renderClist(); populateCliSel();
 }
 
@@ -517,7 +519,7 @@ function populateCliSel(curVal){
   var v=curVal||s.value;
   s.innerHTML='<option value="">\u2014 Sem cliente \u2014</option>'
     +clientes.map(function(c){
-      return '<option value="'+c.nome+'"'+(v===c.nome?' selected':'')+'>'+c.nome+(c.local?' ('+c.local+')':'')+'</option>';
+      return '<option value="'+c.nome+'"'+(v===c.nome?' selected':'')+'>'+(c.num?'['+c.num+'] ':'')+c.nome+(c.local?' ('+c.local+')':'')+'</option>';
     }).join("");
 }
 
@@ -576,12 +578,16 @@ document.addEventListener('DOMContentLoaded', function(){
 /* =========================================================
    SIDEBAR
    ========================================================= */
-function filtrar(q){ renderSidebar(q.toLowerCase()); }
+function filtrar(q){
+  var ql=q.toLowerCase();
+  var matchedCliNomes=clientes.filter(function(c){return c.num&&c.num.toLowerCase().indexOf(ql)>=0;}).map(function(c){return c.nome;});
+  renderSidebar(ql,matchedCliNomes);
+}
 
-function renderSidebar(f){
+function renderSidebar(f,extraClis){
   f=f||"";
   document.getElementById("badge-n").textContent=receitas.length;
-  var items=f?receitas.filter(function(r){return r.nome.toLowerCase().indexOf(f)>=0||(r.cliente||"").toLowerCase().indexOf(f)>=0;}):receitas;
+  var items=f?receitas.filter(function(r){return r.nome.toLowerCase().indexOf(f)>=0||(r.cliente||"").toLowerCase().indexOf(f)>=0||(extraClis&&extraClis.indexOf(r.cliente)>=0);}):receitas;
   var el=document.getElementById("rlist");
   if(!items.length){el.innerHTML='<div class="lmt">Sem resultados.</div>';return;}
   el.innerHTML=items.map(function(r){
