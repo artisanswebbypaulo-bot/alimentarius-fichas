@@ -291,7 +291,12 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#DFF0F9;color:var(--
     <div class="mh"><h2>Nova Ficha T&#233;cnica</h2><button class="mclose" onclick="fecharModalReceita()">&#10005;</button></div>
     <div class="mc">
       <div class="fr"><label>Nome da Receita / Prato *</label><input id="f-nome" placeholder="Ex: Caldo Verde, Frango Assado..."></div>
-      <div class="fr"><label>Cliente</label><select id="f-cli"><option value="">&#8212; Sem cliente &#8212;</option></select></div>
+      <div class="fr"><label>Cliente</label>
+        <div style="position:relative">
+          <input id="f-cli-search" autocomplete="off" placeholder="Pesquisar cliente..." oninput="filtrarCli(this.value)" onfocus="mostrarCliLista()" onblur="setTimeout(function(){esconderCliLista();},200)" style="width:100%;padding:7px 9px;border:1.5px solid var(--bd);border-radius:6px;font-size:13px;outline:none;font-family:inherit;">
+          <input type="hidden" id="f-cli" value="">
+          <div id="f-cli-lista" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid var(--az);border-top:none;border-radius:0 0 6px 6px;max-height:180px;overflow-y:auto;z-index:600;box-shadow:0 4px 12px rgba(0,0,0,.12)"></div>
+        </div></div>
       <div class="fg">
         <div class="fr"><label>Categoria</label><select id="f-cat"><option value="">Selecionar</option>
 <option>Sopas</option>
@@ -515,13 +520,53 @@ function delCliente(id){
 }
 
 function populateCliSel(curVal){
-  var s=document.getElementById("f-cli"); if(!s)return;
-  var v=curVal||s.value;
-  s.innerHTML='<option value="">\u2014 Sem cliente \u2014</option>'
-    +clientes.map(function(c){
-      return '<option value="'+c.nome+'"'+(v===c.nome?' selected':'')+'>'+(c.num?'['+c.num+'] ':'')+c.nome+(c.local?' ('+c.local+')':'')+'</option>';
-    }).join("");
+  var val=curVal||document.getElementById("f-cli").value||"";
+  renderCliLista("", val);
+  if(val){
+    var c=clientes.find(function(c){return c.nome===val;});
+    if(c) document.getElementById("f-cli-search").value=c.nome+(c.num?" ["+c.num+"]":"");
+  } else {
+    document.getElementById("f-cli-search").value="";
+    document.getElementById("f-cli").value="";
+  }
 }
+
+function renderCliLista(q, selected){
+  var lista=document.getElementById("f-cli-lista"); if(!lista) return;
+  var ql=(q||"").toLowerCase();
+  var items=[{nome:"",display:"\u2014 Sem cliente \u2014"}].concat(
+    clientes.filter(function(c){
+      return !ql||c.nome.toLowerCase().indexOf(ql)>=0||(c.num&&c.num.toLowerCase().indexOf(ql)>=0)||(c.local&&c.local.toLowerCase().indexOf(ql)>=0);
+    }).map(function(c){return {nome:c.nome,display:c.nome+(c.num?" ["+c.num+"]":"")+(c.local?" ("+c.local+")":"")};})
+  );
+  lista.innerHTML=items.map(function(item){
+    var sel=item.nome===(selected||"");
+    return '<div onclick="selCli(\''+item.nome.replace(/'/g,"\\'")+'\')" style="padding:7px 10px;cursor:pointer;font-size:13px;background:'+(sel?"var(--az-bg)":"#fff")+';color:'+(sel?"var(--az-d)":"var(--c1)")+'" onmouseover="this.style.background=\'var(--az-bg)\'" onmouseout="this.style.background=\''+(sel?"var(--az-bg)":"#fff")+'\'">'+item.display+'</div>';
+  }).join("");
+}
+
+function selCli(nome){
+  document.getElementById("f-cli").value=nome;
+  var c=nome?clientes.find(function(c){return c.nome===nome;}):null;
+  document.getElementById("f-cli-search").value=c?(c.nome+(c.num?" ["+c.num+"]":"")):"";
+  esconderCliLista();
+}
+
+function filtrarCli(q){
+  mostrarCliLista();
+  renderCliLista(q, document.getElementById("f-cli").value);
+}
+
+function mostrarCliLista(){
+  var lista=document.getElementById("f-cli-lista"); if(!lista) return;
+  renderCliLista(document.getElementById("f-cli-search").value, document.getElementById("f-cli").value);
+  lista.style.display="block";
+}
+
+function esconderCliLista(){
+  var lista=document.getElementById("f-cli-lista"); if(lista) lista.style.display="none";
+}
+
 
 /* =========================================================
    MODAL RECEITA
@@ -530,7 +575,9 @@ function abrirModalReceita(){ populateCliSel(); document.getElementById("mo-rece
 function fecharModalReceita(){
   document.getElementById("mo-receita").style.display="none";
   ["f-nome","f-doses","f-tempo"].forEach(function(id){document.getElementById(id).value="";});
-  ["f-cat","f-sec","f-dif","f-cli"].forEach(function(id){document.getElementById(id).value="";}); var cbs=document.querySelectorAll('#f-confec-wrap input[type="checkbox"]'); cbs.forEach(function(cb){cb.checked=false;cb.closest('label').style.background='#EEF2F5';cb.closest('label').style.borderColor='#D4E0E8';});
+  ["f-cat","f-sec","f-dif"].forEach(function(id){document.getElementById(id).value="";});
+  document.getElementById("f-cli").value="";
+  document.getElementById("f-cli-search").value="";var cbs=document.querySelectorAll('#f-confec-wrap input[type="checkbox"]'); cbs.forEach(function(cb){cb.checked=false;cb.closest('label').style.background='#EEF2F5';cb.closest('label').style.borderColor='#D4E0E8';});
 }
 
 function guardarReceita(){
