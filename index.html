@@ -168,15 +168,16 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#DFF0F9;color:var(--
   .srchbtn,.ntab,.recalc-btn,.cb-wrap,.nc-vr input,.nc-vr .nc-un,
   .afc.nao,.alg-leg,.parea-edit,.select-edit,.input-edit,
   select,input[type=text],input[type=number],
-  .alert-b,.n-tabs,.parea,.no-print
+  .alert-b,.n-tabs,.no-print,.parea
   {display:none!important;height:0!important;margin:0!important;padding:0!important;}
+  .parea+.print-ta{display:block!important;margin-top:4px!important;}
 
   /* ── Mostrar valores de impressão ── */
   .print-val{display:inline!important;font-size:12px;font-weight:600;color:#1B2A35;}
   td .print-val{display:table-cell!important;}
   .only-print{display:inline!important;font-size:12px;font-weight:500;color:#1B2A35;}
   .print-confec{display:block!important;font-size:13px;font-weight:600;color:#1B2A35;margin-bottom:6px;}
-  .print-ta{display:block!important;font-size:12px;white-space:pre-wrap;border:1px solid #e0e0e0;border-radius:4px;padding:7px;margin-top:4px;}
+  .print-ta{display:block!important;font-size:12px;white-space:pre-wrap;border:1px solid #e0e0e0;border-radius:4px;padding:7px;margin-top:4px;min-height:20px;}
 
   /* ── Layout base ── */
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
