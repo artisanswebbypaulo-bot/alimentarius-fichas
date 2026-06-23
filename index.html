@@ -447,7 +447,8 @@ var CONSERVACAO = [
   {v:"amb",   lbl:"Temperatura ambiente",     desc:"Local fresco, seco, ao abrigo da luz solar."},
   {v:"q63",   lbl:"Quente (mín. 63ºC)",  desc:"Manter temperatura mínima de 63ºC até ao serviço."},
   {v:"q75",   lbl:"Quente (mín. 75ºC)",  desc:"Regenerar a temperatura mínima de 75ºC no centro térmico."},
-  {v:"vitrine",lbl:"Vitrina refrigerada (≤5ºC)", desc:"Expositor refrigerado. Não misturar com outros tipos de alimentos."}
+  {v:"vitrine",lbl:"Vitrina refrigerada (≤5ºC)", desc:"Expositor refrigerado. Não misturar com outros tipos de alimentos."},
+  {v:"imediato",lbl:"Consumo Imediato",                 desc:"Destina-se a consumo imediato após confeção. Não guardar."}
 ];
 
 var MICRO_GRUPOS = {
@@ -792,9 +793,9 @@ function renderIngRow(rid,ing,i){
     +'<button class="srchbtn no-print" onclick="pesquisarIngrediente('+rid+','+i+')" title="Pesquisar automaticamente">\uD83D\uDD0D</button>'
     +'<span class="only-print">'+safeName+'</span>'
     +'</div></td>'
-    +'<td><input type="number" class="no-print" value="'+(ing.qty||100)+'" min="0" step="1" onchange="updateIngField('+rid+','+i+',\'qty\',parseFloat(this.value)||0)" style="width:60px"><span class="only-print">'+(ing.qty||100)+'</span></td>'
+    +'<td><input type="number" class="no-print" value="'+(ing.qty!==null&&ing.qty!==undefined?ing.qty:'')+'" min="0" step="0.001" onchange="updateIngField('+rid+','+i+',\'qty\',this.value===\'\' ? null : parseFloat(this.value))" style="width:60px"><span class="only-print">'+(ing.qty!==null&&ing.qty!==undefined?ing.qty:'')+'</span></td>'
     +'<td><select class="no-print" onchange="updateIngField('+rid+','+i+',\'unidade\',this.value)">'
-    +["g","kg","ml","L","un","c.s.","c.c.","a gosto"].map(function(u){return '<option'+(ing.unidade===u?' selected':'')+'>'+u+'</option>';}).join("")
+    +["","g","kg","ml","L","un","c.s.","c.c.","a gosto"].map(function(u){return '<option'+(ing.unidade===u?' selected':'')+'>'+u+'</option>';}).join("")
     +'</select><span class="only-print">'+(ing.unidade||'g')+'</span></td>'
     +'<td>'+grupoTag+'</td>'
     +'<td>'+alrgStr+'</td>'
