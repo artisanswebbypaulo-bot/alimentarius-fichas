@@ -255,6 +255,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#DFF0F9;color:var(--
     <button class="btnt btn-sec" onclick="abrirClientes()">&#128101; Clientes</button>
     <button class="btnt btn-sec" onclick="abrirTabelaAlerg()">&#128203; Tabela Alerg&#233;nios</button>
     <button class="btnt btn-nova" onclick="abrirModalReceita()">+ Nova Receita</button>
+    <button class="btnt btn-sec" onclick="exportarDados()" title="Exportar dados">&#11015; Exportar</button>
+    <label class="btnt btn-sec" style="cursor:pointer" title="Importar dados">&#11014; Importar<input type="file" accept=".json" style="display:none" onchange="importarDados(this)"></label>
     <button class="btnt btn-sec" onclick="window.print()">&#128424;</button>
   </div>
 </div>
@@ -1288,6 +1290,58 @@ function gerarTabelaAlerg(){
   a.click();
   setTimeout(function(){URL.revokeObjectURL(url);},5000);
   fecharTabelaAlerg();
+}
+
+/* =========================================================
+   EXPORTAR / IMPORTAR DADOS
+   ========================================================= */
+function exportarDados(){
+  var dados={
+    versao:"1.0",
+    data:new Date().toISOString(),
+    receitas:receitas,
+    clientes:clientes
+  };
+  var json=JSON.stringify(dados,null,2);
+  var blob=new Blob([json],{type:"application/json;charset=utf-8"});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement("a");
+  a.href=url;
+  a.download="alimentarius_dados_"+new Date().toISOString().slice(0,10)+".json";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(function(){URL.revokeObjectURL(url);},1000);
+}
+
+function importarDados(input){
+  var file=input.files[0];
+  if(!file)return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      var dados=JSON.parse(e.target.result);
+      if(!dados.receitas||!dados.clientes){
+        alert("Ficheiro inválido. Certifica-te que é um ficheiro exportado desta aplicação.");
+        return;
+      }
+      var msg="Importar "+dados.receitas.length+" receita(s) e "+dados.clientes.length+" cliente(s)?\n\nATENÇÃO: os dados actuais serão substituídos.";
+      if(!confirm(msg)){input.value="";return;}
+      receitas=dados.receitas;
+      clientes=dados.clientes;
+      salvar();
+      renderSidebar();
+      document.getElementById("content").innerHTML='<div class="card"><div class="cb empty">'
+        +'<div class="ei">✅</div><h2>Dados importados com sucesso</h2>'
+        +'<p>'+receitas.length+' receita(s) e '+clientes.length+' cliente(s) carregados.</p>'
+        +'</div></div>';
+      if(receitas.length>0) setTimeout(function(){selReceita(receitas[0].id);},500);
+    }catch(err){
+      alert("Erro ao ler o ficheiro: "+err.message);
+    }
+    input.value="";
+  };
+  reader.readAsText(file);
 }
 
 </script>
