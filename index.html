@@ -805,19 +805,7 @@ function renderIngRow(rid,ing,i){
 }
 
 function renderResumoNutri(r){
-  var comDados=r.ingredientes.filter(function(i){return i.ai_ok;});
-  if(!comDados.length) return "";
-  var tot=r.nutricional_total||{};
-  var doses=parseFloat(r.doses)||4;
-  var items=NUTRI_DEFS.map(function(n){
-    var v=tot[n.k]||0;
-    var vDose=Math.round(v/doses*100)/100;
-    return '<div class="rsum-i"><div class="rsum-v">'+vDose+'</div>'
-      +'<div class="rsum-l">'+n.lbl+'/dose</div>'
-      +'<div class="rsum-d">'+n.unit+' • total: '+v+n.unit+'</div></div>';
-  }).join("");
-  return '<div class="rsum"><div class="rsum-t">\uD83D\uDCCA Nutricional calculado \u2014 '+comDados.length+' ingrediente(s) pesquisado(s)</div>'
-    +'<div class="rsum-g">'+items+'</div></div>';
+  return "";
 }
 
 function addIngrediente(rid){
