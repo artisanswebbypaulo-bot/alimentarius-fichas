@@ -912,7 +912,7 @@ function renderTabAlergenios(r){
   var naoLst=ALERG.filter(function(a){return r.alergenios[a.id]!=="sim"&&(r.vestigios||[]).indexOf(a.id)<0;});
   var autoBox="";
   if(simLst.length||vesLst.length){
-    autoBox='<div class="ok-b" style="margin-bottom:12px"><strong>Detectado pelos ingredientes:</strong><br>'
+    autoBox='<div class="ok-b" style="margin-bottom:12px"><strong>Detetado nos Ingredientes:</strong><br>'
       +(simLst.length?'<span style="color:var(--vm)">Presente: '+simLst.map(function(a){return a.nome;}).join(", ")+'</span>':'')
       +(simLst.length&&vesLst.length?"<br>":"")
       +(vesLst.length?'<span style="color:var(--la-d)">Pode conter: '+vesLst.map(function(a){return a.nome;}).join(", ")+'</span>':'')
