@@ -1063,20 +1063,46 @@ function renderTabPreparacao(r){
    ========================================================= */
 function renderTabMicro(r){
   var show=activeTab==="microbiologica";
-  var sel=Object.keys(MICRO_GRUPOS).map(function(k){
-    return '<option value="'+k+'"'+((r.grupo_micro||"1A")===k?' selected':'')+'>'+k+' \u2014 '+MICRO_GRUPOS[k].lbl.substring(0,52)+'...</option>';
+  var selecionados=Array.isArray(r.grupos_micro)?r.grupos_micro:(r.grupo_micro?[r.grupo_micro]:["1A"]);
+  var checkboxes=Object.keys(MICRO_GRUPOS).map(function(k){
+    var checked=selecionados.indexOf(k)>=0;
+    return '<label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;padding:4px 8px;border-radius:5px;background:'+(checked?'var(--az-bg)':'var(--c4)')+';border:1px solid '+(checked?'var(--az-b)':'var(--bd)')+';">'
+      +'<input type="checkbox" value="'+k+'"'+(checked?' checked':'')+' onchange="toggleMicro('+r.id+',this.value,this.checked)"> '
+      +'<strong>'+k+'</strong> &mdash; '+MICRO_GRUPOS[k].lbl
+      +'</label>';
   }).join("");
-  var grp=MICRO_GRUPOS[r.grupo_micro||"1A"];
-  var rows=grp.micro.map(function(m){
-    return '<tr><td>'+m[0]+'</td><td class="mok">\u2713 '+m[1]+'</td><td class="mnok">\u2717 Acima do limite</td></tr>';
-  }).join("");
+  // Merge rows from all selected groups, deduplicate by microorganism name
+  var seen={};
+  var rows="";
+  selecionados.forEach(function(k){
+    var grp=MICRO_GRUPOS[k];
+    if(!grp)return;
+    grp.micro.forEach(function(m){
+      if(!seen[m[0]]){
+        seen[m[0]]=true;
+        rows+='<tr><td>'+m[0]+'</td><td class="mok">\u2713 '+m[1]+'</td><td class="mnok">\u2717 Acima do limite</td></tr>';
+      }
+    });
+  });
+  var printVal=selecionados.map(function(k){return k+' \u2014 '+(MICRO_GRUPOS[k]?MICRO_GRUPOS[k].lbl:'');}).join(' | ');
   return '<div class="tc'+(show?' active':'')+'"><div style="margin-bottom:12px">'
-    +'<div class="stit">Grupo Microbiologico INSA</div>'
-    +'<select onchange="editCampo('+r.id+',\'grupo_micro\',this.value)" style="padding:7px 9px;border:1.5px solid var(--bd);border-radius:6px;font-size:13px;outline:none;width:100%">'+sel+'</select>'+'<span class="print-val">'+(r.grupo_micro||'1A')+' \u2014 '+(MICRO_GRUPOS[r.grupo_micro||'1A'].lbl||'')+'</span>'
-    +'<div style="margin-top:6px;font-size:11px;font-style:italic;color:var(--c2)">'+grp.lbl+'</div></div>'
-    +'<table class="dt"><thead><tr><th>Microrganismo</th><th>Satisfat\u00f3rio</th><th>N\u00e3o Satisfat\u00f3rio</th></tr></thead><tbody>'+rows+'</tbody></table>'
+    +'<div class="stit">Grupo Microbiologico INSA <span style="font-size:11px;font-weight:400;opacity:.7">(escolha m\u00faltipla)</span></div>'
+    +'<div style="display:flex;flex-direction:column;gap:5px;margin-bottom:10px" class="cb-wrap">'+checkboxes+'</div>'
+    +'<span class="print-val">'+printVal+'</span>'
+    +'</div>'
+    +(rows?'<table class="dt"><thead><tr><th>Microrganismo</th><th>Satisfat\u00f3rio</th><th>N\u00e3o Satisfat\u00f3rio</th></tr></thead><tbody>'+rows+'</tbody></table>':'')
     +'<div class="info-b" style="margin-top:10px">Fonte: Valores Guia INSA. Regulamento (CE) 2073/2005.</div>'
     +'</div>';
+}
+
+function toggleMicro(rid,val,checked){
+  var r=receitas.find(function(x){return x.id===rid;});
+  if(!r)return;
+  if(!Array.isArray(r.grupos_micro)) r.grupos_micro=r.grupo_micro?[r.grupo_micro]:["1A"];
+  if(checked){if(r.grupos_micro.indexOf(val)<0)r.grupos_micro.push(val);}
+  else{r.grupos_micro=r.grupos_micro.filter(function(v){return v!==val;});}
+  r.grupo_micro=r.grupos_micro[0]||"1A";
+  salvar(); renderFicha();
 }
 
 /* =========================================================
