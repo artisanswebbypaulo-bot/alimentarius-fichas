@@ -297,7 +297,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#DFF0F9;color:var(--
           <div id="f-cli-lista" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid var(--az);border-top:none;border-radius:0 0 6px 6px;max-height:180px;overflow-y:auto;z-index:600;box-shadow:0 4px 12px rgba(0,0,0,.12)"></div>
         </div></div>
       <div class="fg">
-        <div class="fr"><label>Categoria</label><select id="f-cat"><option value="">Selecionar</option>
+        <div class="fr"><label>Categoria</label><select id="f-cat" onchange="verificarNovaCategoria(this)"><option value="">Selecionar</option>
 <option>Sopas</option>
 <option>Entradas / Petiscos</option>
 <option>Pratos de Carne</option>
@@ -310,7 +310,9 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#DFF0F9;color:var(--
 <option>Pastelaria</option>
 <option>Bebidas</option>
 <option>Sandes / Snacks</option>
-<option>Sushi / Peixe Cru</option></select></div>
+<option>Sushi / Peixe Cru</option>
+<option value="__nova__">+ Nova categoria...</option></select>
+<input id="f-cat-nova" placeholder="Nome da nova categoria" style="display:none;margin-top:4px;width:100%;padding:7px 9px;border:1.5px solid var(--az);border-radius:6px;font-size:13px;outline:none;font-family:inherit;" onblur="confirmarNovaCategoria()"></div>
         <div class="fr"><label>Sec&#231;&#227;o</label><select id="f-sec"><option value="">Selecionar</option>
 <option>Ementa Geral</option>
 <option>Menu Infantil</option>
@@ -1293,8 +1295,42 @@ function gerarTabelaAlerg(){
 }
 
 /* =========================================================
-   EXPORTAR / IMPORTAR DADOS
+   NOVA CATEGORIA
    ========================================================= */
+function verificarNovaCategoria(sel){
+  var inp=document.getElementById("f-cat-nova");
+  if(sel.value==="__nova__"){
+    inp.style.display="block";
+    sel.value="";
+    setTimeout(function(){inp.focus();},50);
+  } else {
+    inp.style.display="none";
+    inp.value="";
+  }
+}
+
+function confirmarNovaCategoria(){
+  var sel=document.getElementById("f-cat");
+  var inp=document.getElementById("f-cat-nova");
+  var nova=inp.value.trim();
+  if(!nova){inp.style.display="none";return;}
+  // Add to select if not already there
+  var exists=false;
+  for(var i=0;i<sel.options.length;i++){
+    if(sel.options[i].value===nova){exists=true;break;}
+  }
+  if(!exists){
+    var opt=document.createElement("option");
+    opt.value=nova;
+    opt.text=nova;
+    // Insert before the last option (+ Nova categoria...)
+    sel.insertBefore(opt, sel.options[sel.options.length-1]);
+  }
+  sel.value=nova;
+  inp.style.display="none";
+}
+
+
 function exportarDados(){
   var dados={
     versao:"1.0",
