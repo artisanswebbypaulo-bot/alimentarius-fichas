@@ -1351,10 +1351,13 @@ function filtrarReat(q){ renderReatOpts(q); }
 
 function confirmarReatribuir(){
   var r=receitas.find(function(x){return x.id===_reatribuirRid;});
+  console.log("reatribuir: rid="+_reatribuirRid+" r="+JSON.stringify(r?r.nome:"null"));
   if(!r){fecharReatribuir();return;}
   var val=document.getElementById("reat-cli").value;
+  console.log("reatribuir: val="+val);
   if(!val){fecharReatribuir();return;}
   r.cliente=val.split("__")[0]||"";
+  console.log("reatribuir: novo cliente="+r.cliente);
   rid=_reatribuirRid;
   salvar();
   fecharReatribuir();
