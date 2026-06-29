@@ -681,7 +681,7 @@ function renderFicha(){
     +'<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap">'
     +'<div style="flex:1"><div class="rtit" contenteditable="true" onblur="editCampo('+r.id+',%22nome%22,this.textContent.trim())">'+r.nome+'</div>'
     +'<div class="rmeta">'
-    +(r.cliente?'<div class="pill c"><span style="font-size:10px;font-weight:600;opacity:.7">Cliente:</span> '+r.cliente+'</div>':'')
+    +(r.cliente?'<div class="pill c" style="cursor:pointer" onclick="abrirReatribuir('+r.id+')" title="Clica para alterar o cliente"><span style="font-size:10px;font-weight:600;opacity:.7">Cliente:</span> '+r.cliente+(function(){var c=clientes.find(function(x){return x.nome===r.cliente;});return c&&c.num?' ['+c.num+']':'';})()+'<span style="font-size:9px;opacity:.6;margin-left:3px">✏</span></div>':'')
     +(r.doses?'<div class="pill"><span style="font-size:10px;font-weight:600;opacity:.7">Doses:</span> '+r.doses+'</div>':'')
     +(r.tempo?'<div class="pill"><span style="font-size:10px;font-weight:600;opacity:.7">Tempo:</span> '+r.tempo+' min</div>':'')
     +(r.tipos_confec&&r.tipos_confec.length?'<div class="pill"><span style="font-size:10px;font-weight:600;opacity:.7">Confeção:</span> '+r.tipos_confec.join(' + ')+'</div>':'')
@@ -1313,6 +1313,52 @@ function gerarTabelaAlerg(){
 }
 
 /* =========================================================
+   REATRIBUIR CLIENTE
+   ========================================================= */
+var _reatribuirRid=null;
+
+function renderReatOpts(q){
+  var ql=(q||"").toLowerCase();
+  var s=document.getElementById("reat-cli");
+  s.innerHTML='<option value="">— Sem cliente —</option>'
+    +clientes.filter(function(c){
+      return !ql||c.nome.toLowerCase().indexOf(ql)>=0||(c.num&&c.num.toLowerCase().indexOf(ql)>=0);
+    }).map(function(c){
+      return '<option value="'+c.nome+'__'+(c.num||"")+'">'+c.nome+(c.num?" ["+c.num+"]":"")+(c.local?" ("+c.local+")":"")+'</option>';
+    }).join("");
+}
+
+function abrirReatribuir(rid){
+  _reatribuirRid=parseInt(rid)||rid;
+  document.getElementById("reat-search").value="";
+  renderReatOpts("");
+  var r=receitas.find(function(x){return x.id===_reatribuirRid;});
+  if(r&&r.cliente){
+    var s=document.getElementById("reat-cli");
+    for(var i=0;i<s.options.length;i++){
+      if(s.options[i].value.split("__")[0]===r.cliente){s.selectedIndex=i;break;}
+    }
+  }
+  document.getElementById("mo-reatribuir").style.display="flex";
+}
+
+function fecharReatribuir(){
+  document.getElementById("mo-reatribuir").style.display="none";
+  _reatribuirRid=null;
+}
+
+function filtrarReat(q){ renderReatOpts(q); }
+
+function confirmarReatribuir(){
+  var r=receitas.find(function(x){return x.id===_reatribuirRid;});
+  if(!r){fecharReatribuir();return;}
+  var val=document.getElementById("reat-cli").value;
+  r.cliente=val.split("__")[0]||"";
+  salvar(); fecharReatribuir(); renderSidebar(); renderFicha();
+}
+
+
+/* =========================================================
    NOVA CATEGORIA
    ========================================================= */
 function verificarNovaCategoria(sel){
@@ -1416,6 +1462,23 @@ function importarDados(input){
     <div class="mf">
       <button class="btn btn-s" onclick="fecharTabelaAlerg()">Cancelar</button>
       <button class="btn btn-p" onclick="gerarTabelaAlerg()">&#128444; Gerar e Imprimir</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL REATRIBUIR CLIENTE -->
+<div class="mo" id="mo-reatribuir" style="display:none">
+  <div class="mdl" style="max-width:420px">
+    <div class="mh"><h2>&#9999; Alterar Cliente</h2><button class="mclose" onclick="fecharReatribuir()">&#10005;</button></div>
+    <div class="mc">
+      <div class="fr"><label>Seleccionar Cliente</label>
+        <input id="reat-search" autocomplete="off" placeholder="Pesquisar..." oninput="filtrarReat(this.value)" style="margin-bottom:4px;width:100%;padding:7px 9px;border:1.5px solid var(--az);border-radius:6px;font-size:13px;outline:none;font-family:inherit;">
+        <select id="reat-cli" size="6" style="width:100%;border:1.5px solid var(--bd);border-radius:6px;font-size:13px;padding:4px;outline:none;"></select>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn btn-s" onclick="fecharReatribuir()">Cancelar</button>
+      <button class="btn btn-p" onclick="confirmarReatribuir()">✓ Confirmar</button>
     </div>
   </div>
 </div>
