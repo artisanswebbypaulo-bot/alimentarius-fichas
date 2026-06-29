@@ -1204,20 +1204,14 @@ function fecharTabelaAlerg(){
 
 function gerarTabelaAlerg(){
   var cliRaw=document.getElementById("tab-cli-sel").value;
-  var cliParts=cliRaw.split("__");
-  var cliNome=cliParts[0]||"";
-  var cliNum=cliParts.length>1?cliParts[1]:null;
+  var cliNome=cliRaw.split("__")[0]||"";
   var cliFilter=cliNome;
   var lista=receitas.filter(function(r){
-    if(cliFilter==="") return true;
-    if(r.cliente!==cliNome) return false;
-    if(cliNum===null) return true;
-    var c=clientes.find(function(x){return x.nome===r.cliente;});
-    return !c||(c.num||"")===(cliNum);
+    return cliFilter===""||r.cliente===cliNome;
   });
   if(!lista.length){alert("Sem receitas para os filtros seleccionados.");return;}
 
-  var cliObj=cliNome?clientes.find(function(c){return c.nome===cliNome&&(cliNum===null||(c.num||"")===(cliNum||"")); }):null;
+  var cliObj=cliNome?clientes.find(function(c){return c.nome===cliNome;}):null;
 
   var ALERG_COLS=[
     {id:"gluten",     nome:"Glúten"},
