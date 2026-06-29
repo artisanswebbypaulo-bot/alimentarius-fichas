@@ -500,7 +500,10 @@ function renderClist(){
     return '<div class="crow"><div><div style="font-weight:600">'+c.nome+'</div>'
       +'<div style="font-size:11px;color:var(--c2)">'
       +[(c.num?"Nº "+c.num:null),c.local,c.tel,c.email].filter(Boolean).join(" \u00b7 ")+'</div></div>'
-      +'<button class="delbtn" onclick="delCliente('+c.id+')">✕</button></div>';
+      +'<div style="display:flex;gap:4px">'
+      +'<button class="delbtn" style="background:var(--az-bg);color:var(--az-d);border:1px solid var(--az-b)" onclick="editarCliente('+c.id+')">✏</button>'
+      +'<button class="delbtn" onclick="delCliente('+c.id+')">✕</button>'
+      +'</div></div>';
   }).join("");
 }
 
@@ -1368,6 +1371,51 @@ function confirmarReatribuir(){
 
 
 /* =========================================================
+   EDITAR CLIENTE
+   ========================================================= */
+var _editCliId=null;
+
+function editarCliente(id){
+  var c=clientes.find(function(x){return x.id===id||x.id==id;});
+  if(!c)return;
+  _editCliId=c.id;
+  document.getElementById("ec-nome").value=c.nome||"";
+  document.getElementById("ec-nif").value=c.nif||"";
+  document.getElementById("ec-num").value=c.num||"";
+  document.getElementById("ec-designacao").value=c.designacao||"";
+  document.getElementById("ec-morada").value=c.morada||"";
+  document.getElementById("ec-local").value=c.local||"";
+  document.getElementById("ec-tel").value=c.tel||"";
+  document.getElementById("ec-email").value=c.email||"";
+  document.getElementById("mo-edit-cli").style.display="flex";
+}
+
+function fecharEditCliente(){
+  document.getElementById("mo-edit-cli").style.display="none";
+  _editCliId=null;
+}
+
+function guardarEditCliente(){
+  var nome=document.getElementById("ec-nome").value.trim();
+  if(!nome){alert("O nome é obrigatório.");return;}
+  var c=clientes.find(function(x){return x.id===_editCliId||x.id==_editCliId;});
+  if(!c){fecharEditCliente();return;}
+  c.nome=nome;
+  c.nif=document.getElementById("ec-nif").value.trim();
+  c.num=document.getElementById("ec-num").value.trim();
+  c.designacao=document.getElementById("ec-designacao").value.trim();
+  c.morada=document.getElementById("ec-morada").value.trim();
+  c.local=document.getElementById("ec-local").value.trim();
+  c.tel=document.getElementById("ec-tel").value.trim();
+  c.email=document.getElementById("ec-email").value.trim();
+  salvar();
+  renderClist();
+  populateCliSel();
+  fecharEditCliente();
+}
+
+
+/* =========================================================
    NOVA CATEGORIA
    ========================================================= */
 function verificarNovaCategoria(sel){
@@ -1488,6 +1536,35 @@ function importarDados(input){
     <div class="mf">
       <button class="btn btn-s" onclick="fecharReatribuir()">Cancelar</button>
       <button class="btn btn-p" onclick="confirmarReatribuir()">✓ Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDITAR CLIENTE -->
+<div class="mo" id="mo-edit-cli" style="display:none">
+  <div class="mdl" style="max-width:580px">
+    <div class="mh"><h2>&#9999; Editar Cliente</h2><button class="mclose" onclick="fecharEditCliente()">&#10005;</button></div>
+    <div class="mc">
+      <div class="fg">
+        <div class="fr"><label>Nome / Empresa *</label><input id="ec-nome" placeholder="Ex: Restaurante O&#225;sis"></div>
+        <div class="fr"><label>NIF</label><input id="ec-nif" placeholder="510 123 456"></div>
+      </div>
+      <div class="fg">
+        <div class="fr"><label>N&#186; Cliente</label><input id="ec-num" placeholder="Ex: CLI-001"></div>
+        <div class="fr"><label>Designa&#231;&#227;o Comercial</label><input id="ec-designacao" placeholder="Ex: Unidade de Restaura&#231;&#227;o"></div>
+      </div>
+      <div class="fg">
+        <div class="fr"><label>Morada</label><input id="ec-morada" placeholder="Rua, n.&#186;..."></div>
+        <div class="fr"><label>Localidade</label><input id="ec-local" placeholder="Ex: Malveira"></div>
+      </div>
+      <div class="fg">
+        <div class="fr"><label>Telefone</label><input id="ec-tel" placeholder="21x xxx xxx"></div>
+        <div class="fr"><label>Email</label><input type="email" id="ec-email" placeholder="geral@empresa.pt"></div>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn btn-s" onclick="fecharEditCliente()">Cancelar</button>
+      <button class="btn btn-p" onclick="guardarEditCliente()">&#10003; Guardar</button>
     </div>
   </div>
 </div>
