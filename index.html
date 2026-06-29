@@ -1181,7 +1181,7 @@ function abrirTabelaAlerg(){
   s.innerHTML='<option value="">Todos os clientes</option>'
     +clientes.map(function(c){
       var label=c.nome+(c.num?" ["+c.num+"]":"");
-      return '<option value="'+c.nome+'">'+label+'</option>';
+      return '<option value="'+c.nome+'__'+(c.num||'')+'">'+label+'</option>';
     }).join("");
   document.getElementById("tab-cli-search").value="";
   document.getElementById("mo-tabela").style.display="flex";
@@ -1195,7 +1195,7 @@ function filtrarCliTabela(q){
       return !ql||c.nome.toLowerCase().indexOf(ql)>=0||(c.num&&c.num.toLowerCase().indexOf(ql)>=0)||(c.local&&c.local.toLowerCase().indexOf(ql)>=0);
     }).map(function(c){
       var label=c.nome+(c.num?" ["+c.num+"]":"");
-      return '<option value="'+c.nome+'">'+label+'</option>';
+      return '<option value="'+c.nome+'__'+(c.num||'')+'">'+label+'</option>';
     }).join("");
 }
 function fecharTabelaAlerg(){
@@ -1203,13 +1203,21 @@ function fecharTabelaAlerg(){
 }
 
 function gerarTabelaAlerg(){
-  var cliFilter=document.getElementById("tab-cli-sel").value;
+  var cliRaw=document.getElementById("tab-cli-sel").value;
+  var cliParts=cliRaw.split("__");
+  var cliNome=cliParts[0]||"";
+  var cliNum=cliParts.length>1?cliParts[1]:null;
+  var cliFilter=cliNome;
   var lista=receitas.filter(function(r){
-    return cliFilter===""||r.cliente===cliFilter;
+    if(cliFilter==="") return true;
+    if(r.cliente!==cliNome) return false;
+    if(cliNum===null) return true;
+    var c=clientes.find(function(x){return x.nome===r.cliente;});
+    return !c||(c.num||"")===(cliNum);
   });
   if(!lista.length){alert("Sem receitas para os filtros seleccionados.");return;}
 
-  var cliObj=cliFilter?clientes.find(function(c){return c.nome===cliFilter;}):null;
+  var cliObj=cliNome?clientes.find(function(c){return c.nome===cliNome&&(cliNum===null||(c.num||"")===(cliNum||"")); }):null;
 
   var ALERG_COLS=[
     {id:"gluten",     nome:"Glúten"},
