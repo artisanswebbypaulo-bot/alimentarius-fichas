@@ -670,7 +670,7 @@ function renderSbAlerg(){
 function selReceita(id){ rid=parseInt(id)||id; activeTab="ingredientes"; nFaixa="adulto"; renderSidebar(); renderFicha(); renderSbAlerg(); }
 
 function renderFicha(){
-  var r=receitas.find(function(x){return x.id===rid;}); if(!r)return;
+  var r=receitas.find(function(x){return x.id==rid;}); if(!r)return;
   var nAlerg=Object.values(r.alergenios||{}).filter(function(v){return v==="sim"||v==="possivel";}).length;
   var TABS=[["ingredientes","\uD83E\uDD55 Ingredientes"],["alergenios","\u26A0 Alerg\u00e9nios"],
             ["nutricional","\uD83D\uDCCA Nutricional"],["preparacao","\uD83D\uDC68\u200D\uD83C\uDF73 Prepara\u00e7\u00e3o"],
