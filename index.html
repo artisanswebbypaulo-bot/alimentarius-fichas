@@ -693,6 +693,7 @@ function renderFicha(){
     +'</div>'
     +'<div class="xbtns">'
     +'<button class="btnx bsav" onclick="salvarReceita('+r.id+')">💾 Guardar</button>'
+    +'<button class="btnx" style="background:var(--az);color:#fff;" onclick="duplicarReceita('+r.id+')">⧉ Duplicar</button>'
     +'<button class="btnx bpdf" onclick="window.print()">🖨 Imprimir / PDF</button>'
     +'<button class="btnx bdel" onclick="delReceita('+r.id+')">🗑 Eliminar</button>'
     +'</div>'
@@ -1123,6 +1124,19 @@ function editCampo(rid,campo,val){
 // editCampo com rerenderização (para campos que afectam o layout)
 function editCampoR(rid,campo,val){
   editCampo(rid,campo,val); renderFicha();
+}
+
+function duplicarReceita(rid){
+  rid=parseInt(rid)||rid;
+  var r=receitas.find(function(x){return x.id==rid;});
+  if(!r)return;
+  var copia=JSON.parse(JSON.stringify(r));
+  copia.id=Date.now();
+  copia.nome="Cópia de "+r.nome;
+  receitas.unshift(copia);
+  salvar();
+  renderSidebar();
+  selReceita(copia.id);
 }
 
 function salvarReceita(rid){
