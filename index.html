@@ -1353,8 +1353,14 @@ function confirmarReatribuir(){
   var r=receitas.find(function(x){return x.id===_reatribuirRid;});
   if(!r){fecharReatribuir();return;}
   var val=document.getElementById("reat-cli").value;
+  if(!val){fecharReatribuir();return;}
   r.cliente=val.split("__")[0]||"";
-  salvar(); fecharReatribuir(); renderSidebar(); renderFicha();
+  rid=_reatribuirRid;
+  salvar();
+  fecharReatribuir();
+  renderSidebar();
+  renderFicha();
+  renderSbAlerg();
 }
 
 
