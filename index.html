@@ -1179,8 +1179,24 @@ if(receitas.length>0) selReceita(receitas[0].id);
 function abrirTabelaAlerg(){
   var s=document.getElementById("tab-cli-sel");
   s.innerHTML='<option value="">Todos os clientes</option>'
-    +clientes.map(function(c){return '<option value="'+c.nome+'">'+c.nome+'</option>';}).join("");
+    +clientes.map(function(c){
+      var label=c.nome+(c.num?" ["+c.num+"]":"");
+      return '<option value="'+c.nome+'">'+label+'</option>';
+    }).join("");
+  document.getElementById("tab-cli-search").value="";
   document.getElementById("mo-tabela").style.display="flex";
+}
+
+function filtrarCliTabela(q){
+  var ql=q.toLowerCase();
+  var s=document.getElementById("tab-cli-sel");
+  s.innerHTML='<option value="">Todos os clientes</option>'
+    +clientes.filter(function(c){
+      return !ql||c.nome.toLowerCase().indexOf(ql)>=0||(c.num&&c.num.toLowerCase().indexOf(ql)>=0)||(c.local&&c.local.toLowerCase().indexOf(ql)>=0);
+    }).map(function(c){
+      var label=c.nome+(c.num?" ["+c.num+"]":"");
+      return '<option value="'+c.nome+'">'+label+'</option>';
+    }).join("");
 }
 function fecharTabelaAlerg(){
   document.getElementById("mo-tabela").style.display="none";
@@ -1387,6 +1403,7 @@ function importarDados(input){
     <div class="mh"><h2>&#128203; Tabela de Alerg&#233;nios</h2><button class="mclose" onclick="fecharTabelaAlerg()">&#10005;</button></div>
     <div class="mc">
       <div class="fr"><label>Filtrar por Cliente</label>
+        <input id="tab-cli-search" placeholder="Pesquisar por nome ou n&#186; cliente..." oninput="filtrarCliTabela(this.value)" style="margin-bottom:4px;width:100%;padding:7px 9px;border:1.5px solid var(--bd);border-radius:6px;font-size:13px;outline:none;font-family:inherit;">
         <select id="tab-cli-sel">
           <option value="">Todos os clientes</option>
         </select>
