@@ -478,6 +478,7 @@ var MICRO_GRUPOS = {
    ========================================================= */
 var receitas = JSON.parse(localStorage.getItem("alim_r5") || "[]");
 var clientes = JSON.parse(localStorage.getItem("alim_c5") || JSON.stringify(CLIENTES_DEF));
+var categoriasExtra = JSON.parse(localStorage.getItem("alim_cat5") || "[]");
 var rid = null;
 var activeTab = "ingredientes";
 var nFaixa = "adulto";
@@ -485,6 +486,7 @@ var nFaixa = "adulto";
 function salvar(){
   localStorage.setItem("alim_r5", JSON.stringify(receitas));
   localStorage.setItem("alim_c5", JSON.stringify(clientes));
+  localStorage.setItem("alim_cat5", JSON.stringify(categoriasExtra));
 }
 
 /* =========================================================
@@ -577,7 +579,23 @@ function esconderCliLista(){
 /* =========================================================
    MODAL RECEITA
    ========================================================= */
-function abrirModalReceita(){ populateCliSel(); document.getElementById("mo-receita").style.display="flex"; setTimeout(function(){document.getElementById("f-nome").focus();},60); }
+function abrirModalReceita(){ populateCliSel(); popularCategoriasExtra(); document.getElementById("mo-receita").style.display="flex"; setTimeout(function(){document.getElementById("f-nome").focus();},60); }
+
+function popularCategoriasExtra(){
+  var sel=document.getElementById("f-cat");
+  if(!sel)return;
+  categoriasExtra.forEach(function(cat){
+    var exists=false;
+    for(var i=0;i<sel.options.length;i++){
+      if(sel.options[i].value===cat){exists=true;break;}
+    }
+    if(!exists){
+      var opt=document.createElement("option");
+      opt.value=cat; opt.text=cat;
+      sel.insertBefore(opt, sel.options[sel.options.length-1]);
+    }
+  });
+}
 function fecharModalReceita(){
   document.getElementById("mo-receita").style.display="none";
   ["f-nome","f-doses","f-tempo"].forEach(function(id){document.getElementById(id).value="";});
@@ -1460,6 +1478,10 @@ function confirmarNovaCategoria(){
     opt.text=nova;
     // Insert before the last option (+ Nova categoria...)
     sel.insertBefore(opt, sel.options[sel.options.length-1]);
+  }
+  if(categoriasExtra.indexOf(nova)<0){
+    categoriasExtra.push(nova);
+    salvar();
   }
   sel.value=nova;
   inp.style.display="none";
