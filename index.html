@@ -700,7 +700,7 @@ function renderFicha(){
   document.getElementById("content").innerHTML=
     '<div class="card"><div class="cb">'
     +'<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap">'
-    +'<div style="flex:1"><div class="rtit" contenteditable="true" onblur="editCampo('+r.id+',%22nome%22,this.textContent.trim())">'+r.nome+'</div>'
+    +'<div style="flex:1"><div class="rtit" contenteditable="true" onblur="editCampo('+r.id+',\'nome\',this.textContent.trim())">'+r.nome+'</div>'
     +'<div class="rmeta">'
     +(r.cliente?'<div class="pill c" style="cursor:pointer" onclick="abrirReatribuir('+r.id+')" title="Clica para alterar o cliente"><span style="font-size:10px;font-weight:600;opacity:.7">Cliente:</span> '+r.cliente+(function(){var c=clientes.find(function(x){return x.nome===r.cliente;});return c&&c.num?' ['+c.num+']':'';})()+'<span style="font-size:9px;opacity:.6;margin-left:3px">✏</span></div>':'')
     +(r.doses?'<div class="pill"><span style="font-size:10px;font-weight:600;opacity:.7">Doses:</span> '+r.doses+'</div>':'')
