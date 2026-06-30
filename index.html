@@ -707,7 +707,7 @@ function renderFicha(){
     +(r.tempo?'<div class="pill"><span style="font-size:10px;font-weight:600;opacity:.7">Tempo:</span> '+r.tempo+' min</div>':'')
     +(r.tipos_confec&&r.tipos_confec.length?'<div class="pill"><span style="font-size:10px;font-weight:600;opacity:.7">Confeção:</span> '+r.tipos_confec.join(' + ')+'</div>':'')
     +(r.dificuldade?'<div class="pill"><span style="font-size:10px;font-weight:600;opacity:.7">Dificuldade:</span> '+r.dificuldade+'</div>':'')
-    +'<div class="pill"><span style="font-size:10px;font-weight:600;opacity:.7">Categoria:</span> '+r.categoria+'</div>'
+    +'<div class="pill" style="cursor:pointer" onclick="abrirEditCategoria('+r.id+')" title="Clica para alterar a categoria"><span style="font-size:10px;font-weight:600;opacity:.7">Categoria:</span> '+r.categoria+'<span style="font-size:9px;opacity:.6;margin-left:3px">✏</span></div>'
     +'</div>'
     +'<div class="xbtns">'
     +'<button class="btnx bsav" onclick="salvarReceita('+r.id+')">💾 Guardar</button>'
@@ -1448,6 +1448,80 @@ function guardarEditCliente(){
 
 
 /* =========================================================
+   EDITAR CATEGORIA DA RECEITA
+   ========================================================= */
+var _editCatRid=null;
+
+function abrirEditCategoria(rid){
+  rid=parseInt(rid)||rid;
+  var r=receitas.find(function(x){return x.id==rid;});
+  if(!r)return;
+  _editCatRid=rid;
+  var sel=document.getElementById("ec-cat-sel");
+  popularCategoriasExtraEm(sel);
+  var found=false;
+  for(var i=0;i<sel.options.length;i++){
+    if(sel.options[i].value===r.categoria){sel.selectedIndex=i;found=true;break;}
+  }
+  if(!found){
+    var opt=document.createElement("option");
+    opt.value=r.categoria; opt.text=r.categoria;
+    sel.insertBefore(opt, sel.options[sel.options.length-1]);
+    sel.value=r.categoria;
+  }
+  document.getElementById("ec-cat-nova").style.display="none";
+  document.getElementById("ec-cat-nova").value="";
+  document.getElementById("mo-edit-cat").style.display="flex";
+}
+
+function popularCategoriasExtraEm(sel){
+  categoriasExtra.forEach(function(cat){
+    var exists=false;
+    for(var i=0;i<sel.options.length;i++){
+      if(sel.options[i].value===cat){exists=true;break;}
+    }
+    if(!exists){
+      var opt=document.createElement("option");
+      opt.value=cat; opt.text=cat;
+      sel.insertBefore(opt, sel.options[sel.options.length-1]);
+    }
+  });
+}
+
+function verificarNovaCategoriaEdit(sel){
+  var inp=document.getElementById("ec-cat-nova");
+  if(sel.value==="__nova__"){
+    inp.style.display="block";
+    setTimeout(function(){inp.focus();},50);
+  } else {
+    inp.style.display="none";
+  }
+}
+
+function fecharEditCategoria(){
+  document.getElementById("mo-edit-cat").style.display="none";
+  _editCatRid=null;
+}
+
+function confirmarEditCategoria(){
+  var r=receitas.find(function(x){return x.id==_editCatRid;});
+  if(!r){fecharEditCategoria();return;}
+  var sel=document.getElementById("ec-cat-sel");
+  var inp=document.getElementById("ec-cat-nova");
+  var nova=sel.value==="__nova__"?inp.value.trim():sel.value;
+  if(!nova){fecharEditCategoria();return;}
+  if(sel.value==="__nova__"&&categoriasExtra.indexOf(nova)<0){
+    categoriasExtra.push(nova);
+  }
+  r.categoria=nova;
+  rid=_editCatRid;
+  salvar();
+  fecharEditCategoria();
+  renderFicha();
+}
+
+
+/* =========================================================
    NOVA CATEGORIA
    ========================================================= */
 function verificarNovaCategoria(sel){
@@ -1601,6 +1675,39 @@ function importarDados(input){
     <div class="mf">
       <button class="btn btn-s" onclick="fecharEditCliente()">Cancelar</button>
       <button class="btn btn-p" onclick="guardarEditCliente()">&#10003; Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDITAR CATEGORIA -->
+<div class="mo" id="mo-edit-cat" style="display:none">
+  <div class="mdl" style="max-width:380px">
+    <div class="mh"><h2>&#9999; Alterar Categoria</h2><button class="mclose" onclick="fecharEditCategoria()">&#10005;</button></div>
+    <div class="mc">
+      <div class="fr"><label>Categoria</label>
+        <select id="ec-cat-sel" onchange="verificarNovaCategoriaEdit(this)">
+          <option value="">Selecionar</option>
+          <option>Sopas</option>
+          <option>Entradas / Petiscos</option>
+          <option>Pratos de Carne</option>
+          <option>Pratos de Peixe</option>
+          <option>Vegetariano / Vegan</option>
+          <option>Massas e Arrozes</option>
+          <option>Acompanhamentos</option>
+          <option>Sobremesas</option>
+          <option>Saladas</option>
+          <option>Pastelaria</option>
+          <option>Bebidas</option>
+          <option>Sandes / Snacks</option>
+          <option>Sushi / Peixe Cru</option>
+          <option value="__nova__">+ Nova categoria...</option>
+        </select>
+        <input id="ec-cat-nova" placeholder="Nome da nova categoria" style="display:none;margin-top:4px;width:100%;padding:7px 9px;border:1.5px solid var(--az);border-radius:6px;font-size:13px;outline:none;font-family:inherit;">
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn btn-s" onclick="fecharEditCategoria()">Cancelar</button>
+      <button class="btn btn-p" onclick="confirmarEditCategoria()">&#10003; Guardar</button>
     </div>
   </div>
 </div>
