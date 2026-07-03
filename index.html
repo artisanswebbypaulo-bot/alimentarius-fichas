@@ -351,6 +351,12 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#DFF0F9;color:var(--
 <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer;padding:3px 8px;border-radius:5px;background:#EEF2F5;border:1px solid #D4E0E8"><input type="checkbox" value="Fritura por Immers&#227;o"> Fritura por Imers&#227;o</label>
 <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer;padding:3px 8px;border-radius:5px;background:#EEF2F5;border:1px solid #D4E0E8"><input type="checkbox" value="Marinado / Curado"> Marinado / Curado</label>
 <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer;padding:3px 8px;border-radius:5px;background:#EEF2F5;border:1px solid #D4E0E8"><input type="checkbox" value="Misto"> Misto</label>
+<div id="f-confec-extra"></div>
+<div style="display:flex;gap:5px;align-items:center;margin-top:3px">
+<input id="f-confec-nova-inp" placeholder="Outro tipo..." style="display:none;padding:4px 8px;border:1.5px solid var(--az);border-radius:5px;font-size:12px;outline:none;font-family:inherit;width:160px">
+<button type="button" id="f-confec-nova-btn" onclick="mostrarNovoConfec()" style="padding:3px 10px;border-radius:5px;background:var(--az-bg);border:1px dashed var(--az-b);color:var(--az-d);font-size:12px;font-weight:700;cursor:pointer">+ Outro tipo...</button>
+<button type="button" id="f-confec-nova-ok" onclick="adicionarNovoConfec()" style="display:none;padding:3px 10px;border-radius:5px;background:var(--az);border:none;color:#fff;font-size:12px;font-weight:700;cursor:pointer">OK</button>
+</div>
 </div></div>
       </div>
     </div>
@@ -480,6 +486,7 @@ var MICRO_GRUPOS = {
 var receitas = JSON.parse(localStorage.getItem("alim_r5") || "[]");
 var clientes = JSON.parse(localStorage.getItem("alim_c5") || JSON.stringify(CLIENTES_DEF));
 var categoriasExtra = JSON.parse(localStorage.getItem("alim_cat5") || "[]");
+var confecExtra = JSON.parse(localStorage.getItem("alim_confec5") || "[]");
 var rid = null;
 var activeTab = "ingredientes";
 var nFaixa = "adulto";
@@ -488,6 +495,7 @@ function salvar(){
   localStorage.setItem("alim_r5", JSON.stringify(receitas));
   localStorage.setItem("alim_c5", JSON.stringify(clientes));
   localStorage.setItem("alim_cat5", JSON.stringify(categoriasExtra));
+  localStorage.setItem("alim_confec5", JSON.stringify(confecExtra));
 }
 
 /* =========================================================
@@ -580,7 +588,46 @@ function esconderCliLista(){
 /* =========================================================
    MODAL RECEITA
    ========================================================= */
-function abrirModalReceita(){ populateCliSel(); popularCategoriasExtra(); document.getElementById("mo-receita").style.display="flex"; setTimeout(function(){document.getElementById("f-nome").focus();},60); }
+function abrirModalReceita(){ populateCliSel(); popularCategoriasExtra(); popularConfecExtra(); document.getElementById("mo-receita").style.display="flex"; setTimeout(function(){document.getElementById("f-nome").focus();},60); }
+
+function popularConfecExtra(){
+  var wrap=document.getElementById("f-confec-extra");
+  if(!wrap)return;
+  wrap.innerHTML=confecExtra.map(function(t){
+    return '<label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer;padding:3px 8px;border-radius:5px;background:#EEF2F5;border:1px solid #D4E0E8"><input type="checkbox" value="'+t+'"> '+t+'</label>';
+  }).join("");
+}
+
+function mostrarNovoConfec(){
+  var inp=document.getElementById("f-confec-nova-inp");
+  var btn=document.getElementById("f-confec-nova-btn");
+  var ok=document.getElementById("f-confec-nova-ok");
+  inp.style.display="inline-block";
+  ok.style.display="inline-block";
+  btn.style.display="none";
+  setTimeout(function(){inp.focus();},50);
+}
+
+function adicionarNovoConfec(){
+  var inp=document.getElementById("f-confec-nova-inp");
+  var btn=document.getElementById("f-confec-nova-btn");
+  var ok=document.getElementById("f-confec-nova-ok");
+  var val=inp.value.trim();
+  if(!val){inp.style.display="none";ok.style.display="none";btn.style.display="inline-block";return;}
+  if(confecExtra.indexOf(val)<0){
+    confecExtra.push(val);
+    salvar();
+  }
+  popularConfecExtra();
+  // Check the new checkbox
+  var wrap=document.getElementById("f-confec-extra");
+  var cbs=wrap.querySelectorAll('input[type="checkbox"]');
+  cbs.forEach(function(cb){if(cb.value===val)cb.checked=true;});
+  inp.value="";
+  inp.style.display="none";
+  ok.style.display="none";
+  btn.style.display="inline-block";
+}
 
 function popularCategoriasExtra(){
   var sel=document.getElementById("f-cat");
@@ -615,7 +662,7 @@ function guardarReceita(){
     doses:document.getElementById("f-doses").value||"4",
     tempo:document.getElementById("f-tempo").value||null,
     dificuldade:document.getElementById("f-dif").value||null,
-    tipos_confec:Array.from(document.querySelectorAll('#f-confec-wrap input[type="checkbox"]:checked')).map(function(cb){return cb.value;}),
+    tipos_confec:Array.from(document.querySelectorAll('#f-confec-wrap input[type="checkbox"]:checked, #f-confec-extra input[type="checkbox"]:checked')).map(function(cb){return cb.value;}),
     preparo_ingr:"",modo_confec:"",
     ingredientes:[],alergenios:{},vestigios:[],
     conservacao:"",validade:"",temp_servico:"",notas_conservacao:"",
