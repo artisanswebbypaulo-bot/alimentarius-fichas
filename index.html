@@ -1721,8 +1721,8 @@ function gerarFichaProfissional(){
     {id:"sulfitos",nome:"Dióxido de Enxofre / Sulfitos"},{id:"tremocos",nome:"Tremoços"},
     {id:"moluscos",nome:"Moluscos"}
   ];
-  var alergRows='<tr><td colspan="3" style="padding:8px 9px;border:1px solid #dde4e8">'
-    +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;">'
+  var alergRows='<tr><td colspan="2" style="padding:8px 9px;border:1px solid #dde4e8">'
+    +'<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:5px;box-sizing:border-box;">'
     +ALERG_COLS.map(function(a){
       var v=r.alergenios[a.id]||"nao";
       var vestigios=r.vestigios||[];
