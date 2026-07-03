@@ -1066,13 +1066,87 @@ function renderTabPreparacao(r){
     +'<div style="margin-top:12px"><div class="stit">Modo de Confe\u00e7\u00e3o</div>'
     +'<textarea class="parea" style="min-height:100px" oninput="editCampo('+r.id+',\'modo_confec\',this.value)" placeholder="Passo a passo...">'+(r.modo_confec||"")+'</textarea></div>'
     +'<div class="print-ta">'+(r.modo_confec||'—')+'</div>'
-    +'<div class="alert-b">'
-    +'\uD83D\uDEBF Lavar e desinfetar as m\u00e3os ap\u00f3s manusear alimentos crus.<br>'
-    +'\uD83C\uDF21 Verificar temperatura interna com term\u00f3metro de sonda.<br>'
-    +'\u2744 Seguir recomenda\u00e7\u00f5es do fornecedor para alimentos congelados.<br>'
-    +'\uD83E\uDD6C Lavar e desinfetar vegetais e frutas com casca.<br>'
-    +'\uD83C\uDF5F Fritadeira: n\u00e3o exceder 180\u00baC.'
-    +'</div></div>';
+    +'<div class="alert-b">'+gerarRecomendacoes(r)+'</div></div>';
+}
+
+function gerarRecomendacoes(r){
+  var sel=r.tipos_confec||[];
+  var cat=r.categoria||"";
+  var recs=[];
+
+  // Always include hand hygiene
+  recs.push("\uD83D\uDEBF Lavar e desinfetar as m\u00e3os antes e ap\u00f3s manusear alimentos.");
+
+  // Based on cooking type
+  var temCruGrelhFrit=sel.some(function(t){return t.indexOf("Cru")>=0||t.indexOf("Sushi")>=0||t.indexOf("Peixe Cru")>=0;});
+  var temGrelhado=sel.some(function(t){return t.indexOf("Grelhado")>=0||t.indexOf("Brasado")>=0||t.indexOf("Wok")>=0;});
+  var temForno=sel.some(function(t){return t.indexOf("Forno")>=0||t.indexOf("Assado")>=0;});
+  var temFrituras=sel.some(function(t){return t.indexOf("Frit")>=0||t.indexOf("Salteado")>=0;});
+  var temCozido=sel.some(function(t){return t.indexOf("Cozido")>=0||t.indexOf("Estufado")>=0||t.indexOf("Vapor")>=0;});
+  var temSousVide=sel.some(function(t){return t.indexOf("Sous-Vide")>=0;});
+  var temFumado=sel.some(function(t){return t.indexOf("Fumado")>=0;});
+  var temConfit=sel.some(function(t){return t.indexOf("Confitado")>=0;});
+  var temMari=sel.some(function(t){return t.indexOf("Marinado")>=0||t.indexOf("Curado")>=0;});
+
+  if(temCruGrelhFrit||cat.indexOf("Sushi")>=0||cat.indexOf("Peixe Cru")>=0){
+    recs.push("\uD83D\uDC1F Produto cru: garantir frescura absoluta e cadeia de frio ininterrupta. Consumir no pr\u00f3prio dia.");
+    recs.push("\u2744 Manter a temperatura m\u00e1xima de 4\u00baC at\u00e9 ao servi\u00e7o.");
+  }
+  if(temGrelhado){
+    recs.push("\uD83C\uDF21 Verificar temperatura interna m\u00ednima de 75\u00baC no centro do alimento com term\u00f3metro de sonda.");
+    recs.push("\uD83D\uDD25 Limpar e desinfetar a grelha antes de cada utiliza\u00e7\u00e3o. Separar utens\u00edlios para carnes cruas e confeccionadas.");
+  }
+  if(temForno){
+    recs.push("\uD83C\uDF21 Verificar temperatura interna com term\u00f3metro de sonda. M\u00ednimo de 75\u00baC para aves, 70\u00baC para outras carnes.");
+    recs.push("\uD83C\uDF73 N\u00e3o sobrepor alimentos no forno para garantir coc\u00e7\u00e3o uniforme.");
+  }
+  if(temFrituras){
+    recs.push("\uD83C\uDF5F Fritadeira: n\u00e3o exceder 180\u00baC. Substituir o \u00f3leo regularmente e filtrar ap\u00f3s cada uso.");
+    recs.push("\uD83D\uDEAB N\u00e3o misturar \u00f3leo novo com usado. Eliminar \u00f3leo com odor ou colora\u00e7\u00e3o escura.");
+  }
+  if(temCozido){
+    recs.push("\uD83C\uDF21 Verificar temperatura interna m\u00ednima de 75\u00baC. Manter a ferver durante pelo menos 2 minutos.");
+  }
+  if(temSousVide){
+    recs.push("\uD83D\uDC89 Sous-vide: respeitar rigorosamente os tempos e temperaturas de pasteuriza\u00e7\u00e3o. Arrefecer em \u00e1gua gelada ap\u00f3s confec\u00e7\u00e3o se n\u00e3o for consumo imediato.");
+  }
+  if(temFumado){
+    recs.push("\uD83D\uDCA8 Fumagem: controlar temperatura interna e tempo de exposi\u00e7\u00e3o. Usar madeiras pr\u00f3prias para uso alimentar.");
+  }
+  if(temConfit){
+    recs.push("\uD83C\uDF21 Confit: manter temperatura constante entre 80\u00baC e 90\u00baC durante todo o processo.");
+  }
+  if(temMari){
+    recs.push("\u2744 Marinagem: efectuar sempre em ambiente refrigerado (0-4\u00baC). Nunca marinar \u00e0 temperatura ambiente.");
+  }
+
+  // Based on category
+  if(cat.indexOf("Peixe")>=0||cat.indexOf("Marisco")>=0||cat.indexOf("Crustáceo")>=0){
+    recs.push("\uD83D\uDC1F Peixe e marisco: verificar sinais de frescura (olhos brilhantes, guelras vermelhas, odor neutro). Cozinhar at\u00e9 carne opaca e bem separada.");
+  }
+  if(cat.indexOf("Salada")>=0||cat.indexOf("Vegetariano")>=0||cat.indexOf("Vegan")>=0){
+    recs.push("\uD83E\uDD6C Lavar e desinfetar todos os vegetais e frutas com casca em solu\u00e7\u00e3o desinfectante aprovada.");
+  }
+  if(cat.indexOf("Sobremesa")>=0||cat.indexOf("Pastelaria")>=0){
+    recs.push("\uD83E\uDD5A Produtos com ovos: verificar frescura. Sobremesas com ovos crus devem ser consumidas no pr\u00f3prio dia.");
+    recs.push("\u2744 Manter refrigerado at\u00e9 ao momento do servi\u00e7o. N\u00e3o deixar \u00e0 temperatura ambiente mais de 2 horas.");
+  }
+  if(cat.indexOf("Carne")>=0){
+    recs.push("\uD83E\uDD69 Carne: separar utens\u00edlios e superf\u00edcies para carne crua e confeccionada. Temperatura interna m\u00ednima: aves 80\u00baC, carne picada 70\u00baC, pe\u00e7as inteiras 65\u00baC.");
+  }
+  if(cat.indexOf("Sopa")>=0){
+    recs.push("\uD83C\uDF5C Sopas: servir a temperatura m\u00ednima de 63\u00baC. Em banho-maria, verificar temperatura a cada 2 horas.");
+  }
+  if(cat.indexOf("Bebida")>=0){
+    recs.push("\uD83E\uDD64 Bebidas com leite ou derivados: manter refrigeradas abaixo de 5\u00baC. Descartar ap\u00f3s 2 horas fora de refrigera\u00e7\u00e3o.");
+  }
+
+  // Generic fallback if no specific type
+  if(sel.length===0){
+    recs.push("\uD83C\uDF21 Verificar temperatura interna com term\u00f3metro de sonda antes de servir.");
+  }
+
+  return recs.join("<br>");
 }
 
 /* =========================================================
