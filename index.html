@@ -1779,12 +1779,14 @@ function gerarFichaProfissional(){
 
     +secTitle("4","Identificação de Alergénios")
     +alergRows
-    +"<tr><td colspan='3' style='font-size:9px;color:#555;padding:5px 9px;border:1px solid #dde4e8'>"
+    +"<tr><td colspan='2' style='font-size:9px;color:#555;padding:5px 9px;border:1px solid #dde4e8'>"
     +"<span style='color:#c0392b;font-weight:700'>C = Contém</span> &nbsp; <span style='color:#ea831a;font-weight:700'>△ = Pode conter</span> &nbsp; <span style='color:#1a7a3c;font-weight:700'>✔ = Ausente</span> &nbsp; | Reg. (UE) 1169/2011, Anexo II</td></tr>"
 
     +secTitle("5","Informação Nutricional")
-    +"<tr><th>Nutriente</th><th>Por dose ("+r.doses+" doses)</th><th>Total receita</th></tr>"
+    +"<tr><td colspan='2' style='padding:0;border:1px solid #dde4e8'><table style='width:100%;border-collapse:collapse'>"
+    +"<tr style='background:#e6f4fb'><th style='padding:5px 8px;font-size:10px;border:none;text-align:left'>Nutriente</th><th style='padding:5px 8px;font-size:10px;border:none;text-align:left'>Por dose ("+r.doses+" doses)</th><th style='padding:5px 8px;font-size:10px;border:none;text-align:left'>Total receita</th></tr>"
     +nutriRows
+    +"</table></td></tr>"
 
     +secTitle("6","Características do Produto")
     +row("Aspeto / Cor",get("pf-aspeto"))
@@ -1818,8 +1820,10 @@ function gerarFichaProfissional(){
     +row("Procedimento em Caso de Recolha","Contactar: alimentarius@alimentarius.pt / 261 405 882")
 
     +secTitle("11","Critérios Microbiológicos")
-    +"<tr><th>Microrganismo</th><th>Limite Aceitável (m)</th><th>Limite Máximo (M)</th><th>Referência</th></tr>"
+    +"<tr><td colspan='2' style='padding:0;border:1px solid #dde4e8'><table style='width:100%;border-collapse:collapse'>"
+    +"<tr style='background:#e6f4fb'><th style='padding:5px 8px;font-size:10px;border:none;text-align:left'>Microrganismo</th><th style='padding:5px 8px;font-size:10px;border:none;text-align:left'>Limite Aceitável</th><th style='padding:5px 8px;font-size:10px;border:none;text-align:left'>Limite Máximo</th><th style='padding:5px 8px;font-size:10px;border:none;text-align:left'>Referência</th></tr>"
     +microRows
+    +"</table></td></tr>"
 
     +secTitle("12","Modo de Utilização")
     +row("Instruções de Utilização",get("pf-util"))
@@ -1862,22 +1866,6 @@ function gerarFichaProfissional(){
   a.href=url; a.target="_blank"; a.click();
   setTimeout(function(){URL.revokeObjectURL(url);},5000);
   fecharFichaProfissional();
-}
-
-
-/* =========================================================
-   NOVA CATEGORIA
-   ========================================================= */
-function verificarNovaCategoria(sel){
-  var inp=document.getElementById("f-cat-nova");
-  if(sel.value==="__nova__"){
-    inp.style.display="block";
-    sel.value="";
-    setTimeout(function(){inp.focus();},50);
-  } else {
-    inp.style.display="none";
-    inp.value="";
-  }
 }
 
 function confirmarNovaCategoria(){
