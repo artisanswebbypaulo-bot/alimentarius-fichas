@@ -1660,6 +1660,7 @@ function gerarFichaProfissional(){
   var r=receitas.find(function(x){return x.id==_profRid;});
   if(!r)return;
 
+  var c=r.cliente?clientes.find(function(x){return x.nome===r.cliente;}):null;
   var get=function(id){return (document.getElementById(id)||{}).value||"";};
 
   var hoje=new Date().toLocaleDateString("pt-PT");
