@@ -187,6 +187,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#DFF0F9;color:var(--
   .card:first-child{page-break-after:avoid;break-after:avoid;display:inline-block;width:100%;}
   .tc{break-inside:avoid;}
   .stit{break-after:avoid;}
+  .sem-nutri{display:none!important;}
   .card:last-child{border-bottom:none!important;}
   .content{display:block!important;}
   .cb{padding:10px 14px!important;}
@@ -988,6 +989,8 @@ function renderTabNutricional(r){
   var tot=r.nutricional_total||{};
   var manual=r.nutricional_manual||{};
   var temAuto=Object.values(tot).some(function(v){return v>0;});
+  var temManual=Object.keys(manual).length>0;
+  var temDados=temAuto||temManual;
 
   var cards=NUTRI_DEFS.map(function(n){
     var vdr=n[fa.vk];
@@ -1012,7 +1015,7 @@ function renderTabNutricional(r){
     '<div class="ok-b"><strong>Cálculo</strong> \u2014 '+r.ingredientes.filter(function(i){return i.ai_ok;}).length+' ingrediente(s) pesquisado(s). Total \u00f7 '+doses+' doses.</div>'
     :'<div class="info-b">\uD83D\uDCA1 Pesquisa os ingredientes com \uD83D\uDD0D para calcular automaticamente, ou preenche manualmente.</div>';
 
-  return '<div class="tc'+(show?' active':'')+'"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">'
+  return '<div class="tc'+(show?' active':'')+(temDados?'':' sem-nutri')+'"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">'
     +'<div class="n-tabs">'+fTabs+'</div>'
     +'<div class="no-print" style="display:flex;gap:6px">'
     +'<button onclick="recalcNutriBtn('+r.id+')" style="padding:4px 10px;border-radius:5px;border:1px solid var(--az-b);background:var(--az-bg);color:var(--az-d);font-size:11px;font-weight:700;cursor:pointer" class="recalc-btn">\u27F3 Recalcular</button>'
