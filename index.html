@@ -1730,7 +1730,9 @@ function gerarFichaProfissional(){
       var isVest=v==="possivel"||vestigios.indexOf(a.id)>=0;
       var bg=isSim?"#fdecea":isVest?"#fdf2e6":"#f0f7f0";
       var cor=isSim?"#c0392b":isVest?"#ea831a":"#1a7a3c";
-      var sym=isSim?"C":isVest?"△":"✔";
+      var sym=isSim?"C":isVest?"△":"";
+      var bg=isSim?"#fdecea":isVest?"#fdf2e6":"#f9f9f9";
+      var cor=isSim?"#c0392b":isVest?"#ea831a":"#ccc";
       return '<div style="background:'+bg+';border-radius:5px;padding:5px 6px;text-align:center;border:1px solid '+cor+'30">'
         +'<div style="font-size:9px;font-weight:700;color:'+cor+'">'+sym+'</div>'
         +'<div style="font-size:8px;font-weight:600;color:#1B2A35;margin-top:2px;line-height:1.2">'+a.nome+'</div>'
