@@ -1674,12 +1674,22 @@ function gerarFichaProfissional(){
     {id:"sulfitos",nome:"Dióxido de Enxofre / Sulfitos"},{id:"tremocos",nome:"Tremoços"},
     {id:"moluscos",nome:"Moluscos"}
   ];
-  var alergRows=ALERG_COLS.map(function(a){
-    var v=r.alergenios[a.id]||"nao";
-    var vestigios=r.vestigios||[];
-    var estado=v==="sim"?"<strong>C — Contém</strong>":((v==="possivel"||vestigios.indexOf(a.id)>=0)?"V — Pode conter vestígios":"— Não contém");
-    return "<tr><td>"+a.nome+"</td><td>"+estado+"</td><td style='font-size:10px;color:#666'>Reg. (UE) 1169/2011, Anexo II</td></tr>";
-  }).join("");
+  var alergRows='<tr><td colspan="3" style="padding:8px 9px;border:1px solid #dde4e8">'
+    +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;">'
+    +ALERG_COLS.map(function(a){
+      var v=r.alergenios[a.id]||"nao";
+      var vestigios=r.vestigios||[];
+      var isSim=v==="sim";
+      var isVest=v==="possivel"||vestigios.indexOf(a.id)>=0;
+      var bg=isSim?"#fdecea":isVest?"#fdf2e6":"#f0f7f0";
+      var cor=isSim?"#c0392b":isVest?"#ea831a":"#1a7a3c";
+      var sym=isSim?"C":isVest?"△":"✔";
+      return '<div style="background:'+bg+';border-radius:5px;padding:5px 6px;text-align:center;border:1px solid '+cor+'30">'
+        +'<div style="font-size:9px;font-weight:700;color:'+cor+'">'+sym+'</div>'
+        +'<div style="font-size:8px;font-weight:600;color:#1B2A35;margin-top:2px;line-height:1.2">'+a.nome+'</div>'
+        +'</div>';
+    }).join("")
+    +'</div></td></tr>';
 
   // Nutritional table
   var tot=r.nutricional_total||{};
@@ -1768,10 +1778,9 @@ function gerarFichaProfissional(){
     +"</td></tr>"
 
     +secTitle("4","Identificação de Alergénios")
-    +"<tr><th>Alergénio</th><th>Estado</th><th>Legislação</th></tr>"
     +alergRows
     +"<tr><td colspan='3' style='font-size:9px;color:#555;padding:5px 9px;border:1px solid #dde4e8'>"
-    +"Legenda: C = Contém | V = Pode conter vestígios | — = Não contém</td></tr>"
+    +"<span style='color:#c0392b;font-weight:700'>C = Contém</span> &nbsp; <span style='color:#ea831a;font-weight:700'>△ = Pode conter</span> &nbsp; <span style='color:#1a7a3c;font-weight:700'>✔ = Ausente</span> &nbsp; | Reg. (UE) 1169/2011, Anexo II</td></tr>"
 
     +secTitle("5","Informação Nutricional")
     +"<tr><th>Nutriente</th><th>Por dose ("+r.doses+" doses)</th><th>Total receita</th></tr>"
