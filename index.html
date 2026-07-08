@@ -321,14 +321,16 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#DFF0F9;color:var(--
 <option>Sushi / Peixe Cru</option>
 <option value="__nova__">+ Nova categoria...</option></select>
 <input id="f-cat-nova" placeholder="Nome da nova categoria" style="display:none;margin-top:4px;width:100%;padding:7px 9px;border:1.5px solid var(--az);border-radius:6px;font-size:13px;outline:none;font-family:inherit;" onblur="confirmarNovaCategoria()"></div>
-        <div class="fr"><label>Sec&#231;&#227;o</label><select id="f-sec"><option value="">Selecionar</option>
+        <div class="fr"><label>Sec&#231;&#227;o</label><select id="f-sec" onchange="verificarNovaSeccao(this)"><option value="">Selecionar</option>
 <option>Ementa Geral</option>
 <option>Menu Infantil</option>
 <option>Menu Dieta</option>
 <option>Carta Sazonal</option>
 <option>Buffet</option>
 <option>Take-Away</option>
-<option>Delivery</option></select></div>
+<option>Delivery</option>
+<option value="__nova__">+ Nova sec&#231;&#227;o...</option></select>
+<input id="f-sec-nova" placeholder="Nome da nova sec&#231;&#227;o" style="display:none;margin-top:4px;width:100%;padding:7px 9px;border:1.5px solid var(--az);border-radius:6px;font-size:13px;outline:none;font-family:inherit;" onblur="confirmarNovaSeccao()"></div>
       </div>
       <div class="fg">
         <div class="fr"><label>Doses</label><input type="number" id="f-doses" placeholder="Ex: 4" min="1"></div>
@@ -493,6 +495,7 @@ var MICRO_GRUPOS = {
 var receitas = JSON.parse(localStorage.getItem("alim_r5") || "[]");
 var clientes = JSON.parse(localStorage.getItem("alim_c5") || JSON.stringify(CLIENTES_DEF));
 var categoriasExtra = JSON.parse(localStorage.getItem("alim_cat5") || "[]");
+var seccoesExtra = JSON.parse(localStorage.getItem("alim_sec5") || "[]");
 var confecExtra = JSON.parse(localStorage.getItem("alim_confec5") || "[]");
 var rid = null;
 var activeTab = "ingredientes";
@@ -502,6 +505,7 @@ function salvar(){
   localStorage.setItem("alim_r5", JSON.stringify(receitas));
   localStorage.setItem("alim_c5", JSON.stringify(clientes));
   localStorage.setItem("alim_cat5", JSON.stringify(categoriasExtra));
+  localStorage.setItem("alim_sec5", JSON.stringify(seccoesExtra));
   localStorage.setItem("alim_confec5", JSON.stringify(confecExtra));
 }
 
@@ -595,7 +599,7 @@ function esconderCliLista(){
 /* =========================================================
    MODAL RECEITA
    ========================================================= */
-function abrirModalReceita(){ populateCliSel(); popularCategoriasExtra(); popularConfecExtra(); document.getElementById("mo-receita").style.display="flex"; setTimeout(function(){document.getElementById("f-nome").focus();},60); }
+function abrirModalReceita(){ populateCliSel(); popularCategoriasExtra(); popularSeccoesExtra(); popularConfecExtra(); document.getElementById("mo-receita").style.display="flex"; setTimeout(function(){document.getElementById("f-nome").focus();},60); }
 
 function popularConfecExtra(){
   var wrap=document.getElementById("f-confec-extra");
@@ -655,6 +659,7 @@ function fecharModalReceita(){
   document.getElementById("mo-receita").style.display="none";
   ["f-nome","f-doses","f-tempo"].forEach(function(id){document.getElementById(id).value="";});
   ["f-cat","f-sec","f-dif"].forEach(function(id){document.getElementById(id).value="";});
+  ["f-cat-nova","f-sec-nova"].forEach(function(id){var el=document.getElementById(id);if(el){el.style.display="none";el.value="";}});
   document.getElementById("f-cli").value="";
   document.getElementById("f-cli-search").value="";var cbs=document.querySelectorAll('#f-confec-wrap input[type="checkbox"]'); cbs.forEach(function(cb){cb.checked=false;cb.closest('label').style.background='#EEF2F5';cb.closest('label').style.borderColor='#D4E0E8';});
 }
@@ -1921,11 +1926,51 @@ function gerarFichaProfissional(){
   fecharFichaProfissional();
 }
 
+function verificarNovaCategoria(sel){
+  var inp=document.getElementById("f-cat-nova");
+  if(sel.value==="__nova__"){inp.style.display="block";inp.value="";inp.focus();}
+  else{inp.style.display="none";}
+}
+function verificarNovaSeccao(sel){
+  var inp=document.getElementById("f-sec-nova");
+  if(sel.value==="__nova__"){inp.style.display="block";inp.value="";inp.focus();}
+  else{inp.style.display="none";}
+}
+function popularSeccoesExtra(){
+  var sel=document.getElementById("f-sec");
+  if(!sel)return;
+  seccoesExtra.forEach(function(sec){
+    var exists=false;
+    for(var i=0;i<sel.options.length;i++){if(sel.options[i].value===sec){exists=true;break;}}
+    if(!exists){
+      var opt=document.createElement("option");
+      opt.value=sec;opt.text=sec;
+      sel.insertBefore(opt,sel.options[sel.options.length-1]);
+    }
+  });
+}
+function confirmarNovaSeccao(){
+  var sel=document.getElementById("f-sec");
+  var inp=document.getElementById("f-sec-nova");
+  var nova=inp.value.trim();
+  if(!nova){inp.style.display="none";if(sel.value==="__nova__")sel.value="";return;}
+  var exists=false;
+  for(var i=0;i<sel.options.length;i++){if(sel.options[i].value===nova){exists=true;break;}}
+  if(!exists){
+    var opt=document.createElement("option");
+    opt.value=nova;opt.text=nova;
+    sel.insertBefore(opt,sel.options[sel.options.length-1]);
+  }
+  if(seccoesExtra.indexOf(nova)<0){seccoesExtra.push(nova);salvar();}
+  sel.value=nova;
+  inp.style.display="none";
+}
+
 function confirmarNovaCategoria(){
   var sel=document.getElementById("f-cat");
   var inp=document.getElementById("f-cat-nova");
   var nova=inp.value.trim();
-  if(!nova){inp.style.display="none";return;}
+  if(!nova){inp.style.display="none";if(sel.value==="__nova__")sel.value="";return;}
   // Add to select if not already there
   var exists=false;
   for(var i=0;i<sel.options.length;i++){
