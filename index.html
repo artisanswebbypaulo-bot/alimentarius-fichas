@@ -160,10 +160,19 @@
     width:100%; border:1px solid transparent; background:none; padding:5px 6px; border-radius:3px;
   }
   table.ingredients input:focus, table.ingredients select:focus{ outline:none; border-color:var(--brand); background:var(--paper-raised); }
-  table.ingredients .col-nome{ width:44%; }
-  table.ingredients .col-qtd{ width:14%; }
-  table.ingredients .col-un{ width:14%; }
-  table.ingredients .col-alerg{ width:22%; }
+  table.ingredients .col-nome{ width:40%; }
+  table.ingredients .col-qtd{ width:12%; }
+  table.ingredients .col-un{ width:12%; }
+  table.ingredients .col-alerg{ width:21%; }
+  table.ingredients .col-nova{ width:15%; min-width:104px; }
+  /* Grupo NOVA: vazio = destaque tracejado laranja; preenchido = cor do grupo */
+  table.ingredients select.nova-sel{ font-weight:600; border-width:1.5px; cursor:pointer; }
+  table.ingredients select.nova-sel.nova-empty{ background:#FFF8EC; border:1.5px dashed #EA831A; color:#8A5A1A; font-weight:500; }
+  table.ingredients select.nova-sel.nova-1{ background:#DDF1E3; border:1.5px solid #2E9E4F; color:#17572B; }
+  table.ingredients select.nova-sel.nova-2{ background:#FBF0C2; border:1.5px solid #E8B800; color:#5C4800; }
+  table.ingredients select.nova-sel.nova-3{ background:#FCE3C8; border:1.5px solid #EA831A; color:#7A3F05; }
+  table.ingredients select.nova-sel.nova-4{ background:#F6D5D1; border:1.5px solid #C0392B; color:#7B1E14; }
+  table.ingredients select.nova-sel:focus{ border-color:var(--brand); }
   table.ingredients .col-rm{ width:40px; text-align:center; }
   .row-remove{ background:none; border:none; color:var(--ink-faint); font-size:15px; }
   .row-remove:hover{ color:var(--status-bad); }
@@ -331,14 +340,17 @@ var NOVA_GROUPS = [
   { code:'3', label:'Grupo 3 - Ingredientes processados', color:'#EA831A' },
   { code:'4', label:'Grupo 4 - Ingredientes ultra-processados', color:'#C0392B' }
 ];
+function novaGrupoClass(current){
+  return 'nova-sel ' + (current ? 'nova-' + current : 'nova-empty');
+}
 function novaGrupoOptions(current){
-  var opts = '<option value="" ' + (!current?'selected':'') + '>—</option>';
+  var opts = '<option value="" ' + (!current?'selected':'') + '>Escolher…</option>';
   opts += NOVA_GROUPS.map(function(g){
     return '<option value="' + g.code + '" ' + (current===g.code?'selected':'') + '>Grupo ' + g.code + '</option>';
   }).join('');
   return opts;
 }
-var APP_VERSION = 'build 2026-09-25-21';
+var APP_VERSION = 'build 2026-11-23-01';
 var ALLERGENS = [
   { id:'gluten', label:'Glúten', short:'GLU',
     test:function(t){
@@ -408,7 +420,15 @@ var INSA_GROUPS = [
   { code:'2D', grupo:2, titulo:'Composto com queijo de leite cru, carne/peixe crus, marinados, fumados ou salgados', exemplos:'Sushi, sashimi, ceviche, tártaro, carpaccio; sandes de presunto/salmão fumado.' },
   { code:'3A', grupo:3, titulo:'Frutos e hortícolas crus, cortados ou preparados no próprio dia', exemplos:'Fruta descascada, saladas de alface/tomate/cenoura com ou sem molho; sumos frescos.' },
   { code:'3B', grupo:3, titulo:'Frutos e hortícolas crus minimamente processados (IV gama)', exemplos:'Saladas embaladas prontas a consumir, Baby Leaf, rebentos.' },
-  { code:'4',  grupo:4, titulo:'Alimentos ou componentes com flora específica própria', exemplos:'Produtos fermentados com culturas vivas, FDL com probióticos, molhos de iogurte.' }
+  { code:'4',  grupo:4, titulo:'Alimentos ou componentes com flora específica própria', exemplos:'Produtos fermentados com culturas vivas, FDL com probióticos, molhos de iogurte.' },
+  // Sem classificação: produto cru, destinado a ser cozinhado antes de consumir (não é "pronto para consumo")
+  { code:'NA', grupo:'na', titulo:'Não aplicável — produto cru, a cozinhar antes de consumir',
+    exemplos:'Massas cruas (pão, pizza, folhados), preparações cruas destinadas a cozedura, ou qualquer produto que não seja consumido tal como é fornecido.',
+    aviso:'Os Valores-guia INSA aplicam-se a alimentos prontos para consumo. Este produto destina-se a ser cozinhado antes de consumir: os valores-guia aplicam-se ao produto final cozido, que deve ser classificado na respetiva ficha.' },
+  // Categoria adicional (não consta da Tabela 1 dos Valores-guia INSA reproduzida nesta app):
+  { code:'PI', grupo:'extra', titulo:'Alimento de Transição ou Complementar Papas Infantis',
+    exemplos:'Alimentos de transição ou complementares destinados a lactentes e crianças pequenas, em particular papas infantis (de cereais, lácteas ou não lácteas), reconstituídas ou prontas a consumir.',
+    aviso:'Categoria adicional — não consta da Tabela 1 dos Valores-guia INSA reproduzida nesta app. Aplicam-se os valores gerais da Tabela 5; confirme os critérios específicos para produtos destinados a lactentes e crianças pequenas.' }
 ];
 
 // -- Tabela 5 do "Valores-guia INSA" (2019): microrganismos patogénicos e toxinas --
@@ -731,6 +751,7 @@ var showSyncPanel = false;
 var syncUrlDraft = '';
 var syncKeyDraft = '';
 var syncStatusMsg = '';
+var supabaseListError = ''; // texto do erro quando a lista de fichas não pôde ser carregada do Supabase ('' = tudo bem)
 
 function supabaseReady(){
   return !!(supabaseConfig.url && supabaseConfig.anonKey);
@@ -756,7 +777,7 @@ async function supabaseErrorDetail(res){
 async function supabaseListRecipes(){
   var res;
   try{
-    res = await fetch(supabaseUrlBase() + '?select=id,nome,categoria,updated_at,idcliente:dados->>idCliente,empresanome:dados->>empresaNome,empresacontacto:dados->>empresaContacto,nif:dados->>nif&order=updated_at.desc', {
+    res = await fetch(supabaseUrlBase() + '?select=id,nome,categoria,updated_at,idcliente:dados->>idCliente,empresanome:dados->>empresaNome,empresacontacto:dados->>empresaContacto,nif:dados->>nif,responsavel:dados->>responsavel&order=updated_at.desc', {
       headers: supabaseHeaders()
     });
   }catch(networkErr){
@@ -767,7 +788,7 @@ async function supabaseListRecipes(){
     throw new Error('HTTP ' + res.status + (detail ? ' — ' + detail : '') + ' (pedido: ' + res.url + ')');
   }
   var rows = await res.json();
-  return rows.map(function(r){ return { id:r.id, nome:r.nome || 'Sem nome', categoria:r.categoria || '', updatedAt:r.updated_at, idCliente:r.idcliente || '', empresaNome:r.empresanome || '', empresaContacto:r.empresacontacto || '', nif:r.nif || '' }; });
+  return rows.map(function(r){ return { id:r.id, nome:r.nome || 'Sem nome', categoria:r.categoria || '', updatedAt:r.updated_at, idCliente:r.idcliente || '', empresaNome:r.empresanome || '', empresaContacto:r.empresacontacto || '', nif:r.nif || '', responsavel:r.responsavel || '' }; });
 }
 async function supabaseGetRecipe(id){
   var res = await fetch(supabaseUrlBase() + '?id=eq.' + encodeURIComponent(id) + '&select=dados', {
@@ -902,7 +923,17 @@ function renderSidebar(){
       '<button data-action="duplicate" data-id="' + r.id + '" title="Duplicar">⧉</button>' +
       '<button data-action="delete" data-id="' + r.id + '" title="Eliminar">✕</button>' +
     '</div>';
-  }).join('') || '<div style="font-size:12px;color:var(--ink-faint);padding:4px 8px;">' + (clientFilter ? 'Este cliente ainda não tem fichas guardadas.' : 'Ainda sem fichas guardadas.') + '</div>';
+  }).join('') || '<div style="font-size:12px;color:var(--ink-faint);padding:4px 8px;">' + (supabaseReady() && supabaseListError ? 'Não foi possível carregar as fichas.' : (clientFilter ? 'Este cliente ainda não tem fichas guardadas.' : 'Ainda sem fichas guardadas.')) + '</div>';
+
+  // Aviso bem visível quando o Supabase não responde (ex.: projeto gratuito em pausa),
+  // para a lista vazia nunca parecer "sem fichas".
+  var connectionWarningHtml = (supabaseReady() && supabaseListError) ?
+    '<div style="margin:0 0 10px;padding:9px 10px;background:#FFF4E5;border-left:3px solid #EA831A;border-radius:3px;font-size:11.5px;line-height:1.45;color:#7A3F05;">' +
+      '<b>⚠ Não foi possível ligar ao Supabase.</b> As suas fichas não foram apagadas. ' +
+      'Se o projeto for gratuito, pode estar <b>em pausa por inatividade</b>: abra o painel do Supabase e clique em <b>Resume project</b>, aguarde uns minutos e volte a tentar.' +
+      '<div style="margin-top:5px;font-size:10.5px;opacity:.8;word-break:break-word;">Detalhe: ' + escapeHtml(supabaseListError.slice(0, 160)) + '</div>' +
+      '<button class="btn small block" data-action="retry-connection" style="margin-top:7px;">↻ Tentar novamente</button>' +
+    '</div>' : '';
 
   document.getElementById('sidebar').innerHTML =
     '<div class="brand">Fichas Técnicas</div>' +
@@ -919,6 +950,7 @@ function renderSidebar(){
     '</div>' +
     '<input type="file" id="import-file-input" accept=".json,application/json" style="display:none">' +
     (statusMsg ? '<div style="font-size:11.5px;color:var(--brand-ink);margin-bottom:10px;">' + statusMsg + '</div>' : '') +
+    connectionWarningHtml +
     '<div class="saved-list-title">Fichas guardadas</div>' +
     clientFilterHtml +
     '<div class="saved-list">' + savedHtml + '</div>' +
@@ -927,6 +959,7 @@ function renderSidebar(){
     '<div style="font-size:9.5px;color:var(--ink-faint);text-align:center;margin-top:16px;">' + APP_VERSION + '</div>';
 }
 function storageNoteText(){
+  if(supabaseReady() && supabaseListError) return '🔗 Supabase configurado, mas sem resposta neste momento (ver aviso acima).';
   if(supabaseReady()) return '🔗 Ligado ao Supabase — os dados ficam disponíveis em qualquer navegador.';
   if(storageMode==='window') return 'As fichas ficam guardadas neste artefacto (dados pessoais, não partilhados).';
   if(storageMode==='local') return 'As fichas ficam guardadas neste navegador, neste computador (não são enviadas para lado nenhum). Se limpar os dados do navegador ou usar outro computador/browser, não estarão lá — use "Exportar dados" para uma cópia de segurança.';
@@ -976,7 +1009,7 @@ function renderHeader(){
         '</div>' : '') +
     '</div>' +
     '<div class="field"><label>Nº de doses</label><input type="text" data-field="porcoes" value="' + escapeAttr(state.porcoes) + '" placeholder="ex.: 10"></div>' +
-    '<div class="field"><label>Responsável técnico</label><input type="text" data-field="responsavel" value="' + escapeAttr(state.responsavel) + '" placeholder="Nome"></div>' +
+    '<div class="field"><label>Responsável técnico</label><input type="text" list="responsavel-datalist" data-field="responsavel" value="' + escapeAttr(state.responsavel) + '" placeholder="Nome"><datalist id="responsavel-datalist">' + getKnownResponsaveis().map(function(n){ return '<option value="' + escapeAttr(n) + '">'; }).join('') + '</datalist></div>' +
     '<div class="field"><label>Data</label><input type="date" data-field="data" value="' + escapeAttr(state.data) + '"></div>' +
   '</div>' +
   '<hr class="rule">';
@@ -1039,6 +1072,20 @@ function getKnownClients(){
   });
   return Object.keys(porId).map(function(id){ return porId[id]; })
     .sort(function(a,b){ return (a.empresaNome||a.idCliente).localeCompare(b.empresaNome||b.idCliente); });
+}
+// Deriva a lista de nomes de responsável técnico já usados nas fichas
+// guardadas, para sugestão automática ao escrever (sem gestão à parte).
+function getKnownResponsaveis(){
+  var vistos = {};
+  var nomes = [];
+  savedIndex.forEach(function(r){
+    if(!r.responsavel) return;
+    var chave = normalize(r.responsavel);
+    if(vistos[chave]) return;
+    vistos[chave] = true;
+    nomes.push(r.responsavel);
+  });
+  return nomes.sort(function(a,b){ return a.localeCompare(b); });
 }
 function renderIdentificacao(){
   return renderHeader() +
@@ -1320,7 +1367,7 @@ function renderIngredientes(){
       '<td class="col-alerg"><div class="chips" id="badges-' + idx + '">' + renderBadgeChips(badges, ing.manual) + '</div>' +
         '<button class="btn small" data-action="toggle-manual-allergen" data-idx="' + idx + '" style="margin-top:4px;font-size:10.5px;padding:2px 6px;">' + (manualOpen ? 'Fechar' : '+ manual') + '</button>' +
       '</td>' +
-      '<td class="col-nova"><select data-ing-nova="true" data-idx="' + idx + '">' + novaGrupoOptions(ing.novaGrupo) + '</select></td>' +
+      '<td class="col-nova"><select class="' + novaGrupoClass(ing.novaGrupo) + '" data-ing-nova="true" data-idx="' + idx + '">' + novaGrupoOptions(ing.novaGrupo) + '</select></td>' +
       '<td class="col-rm"><button class="row-remove" data-action="remove-ing" data-idx="' + idx + '" title="Remover">✕</button></td>' +
     '</tr>' + manualRow;
   }).join('');
@@ -1498,6 +1545,9 @@ function renderNutriTotalsRows(){
    ========================================================= */
 function renderMicrobiologia(){
   var options = '<option value="">Selecionar Grupo/Subgrupo…</option>';
+  INSA_GROUPS.filter(function(x){return x.grupo==='na';}).forEach(function(x){
+    options += '<optgroup label="Sem classificação INSA"><option value="' + x.code + '" ' + (state.insaGroup===x.code?'selected':'') + '>' + x.titulo + '</option></optgroup>';
+  });
   [1,2,3,4].forEach(function(g){
     options += '<optgroup label="Grupo ' + g + '">';
     INSA_GROUPS.filter(function(x){return x.grupo===g;}).forEach(function(x){
@@ -1505,6 +1555,14 @@ function renderMicrobiologia(){
     });
     options += '</optgroup>';
   });
+  var extras = INSA_GROUPS.filter(function(x){return x.grupo==='extra';});
+  if(extras.length){
+    options += '<optgroup label="Categorias adicionais">';
+    extras.forEach(function(x){
+      options += '<option value="' + x.code + '" ' + (state.insaGroup===x.code?'selected':'') + '>' + x.code + ' — ' + x.titulo + '</option>';
+    });
+    options += '</optgroup>';
+  }
 
   return renderHeader() +
   '<h2 class="section-title">Parâmetros microbiológicos</h2>' +
@@ -1521,8 +1579,11 @@ function tierClass(v){
 }
 function renderMicrobioDetail(){
   var group = INSA_GROUPS.filter(function(x){return x.code===state.insaGroup;})[0];
+  var isNA = !!group && group.code === 'NA';
   var groupHtml = group ?
-    '<div class="group-desc"><span class="code-badge">' + group.code + '</span><h4>' + group.titulo + '</h4><p>' + group.exemplos + '</p></div>'
+    '<div class="group-desc"><span class="code-badge">' + group.code + '</span><h4>' + group.titulo + '</h4><p>' + group.exemplos + '</p>' +
+      (group.aviso ? '<p style="font-size:12px;color:var(--ink-faint);margin-top:6px;">' + group.aviso + '</p>' : '') +
+    '</div>'
     : '<div class="banner">Selecione um Grupo/Subgrupo acima para ver a descrição e os exemplos de pratos correspondentes.</div>';
 
   var ingNames = state.ingredientes.map(function(i){return i.nome;});
@@ -1546,13 +1607,12 @@ function renderMicrobioDetail(){
     return '<div class="indicator"><b>' + h.name + '</b><p>' + h.desc + '</p></div>';
   }).join('');
 
-  return groupHtml +
-  '<h3 style="font-family:var(--font-serif);font-size:16px;margin:22px 0 4px;">Microrganismos patogénicos e toxinas — valores-guia (aplicável a alimentos prontos para consumo, em geral)</h3>' +
+  return groupHtml + (isNA ? '' : '<h3 style="font-family:var(--font-serif);font-size:16px;margin:22px 0 4px;">Microrganismos patogénicos e toxinas — valores-guia (aplicável a alimentos prontos para consumo, em geral)</h3>' +
   flaggedNote +
   '<table class="micro"><thead><tr><th>Microrganismo/toxina</th><th>Satisfatório</th><th>Não satisfatório</th><th>Potencialmente perigoso</th></tr></thead><tbody>' + rows + '</tbody></table>' +
   '<h3 style="font-family:var(--font-serif);font-size:16px;margin:22px 0 4px;">Indicadores de higiene e de alteração</h3>' +
   '<p class="section-help">Os limites numéricos (ufc/g) destes indicadores variam consoante o Grupo/Subgrupo selecionado acima (Tabela 6 do documento original). Este protótipo apresenta o significado de cada indicador; confirme os valores numéricos exatos por subgrupo na fonte oficial.</p>' +
-  '<div class="indicator-list">' + indicatorsHtml + '</div>' +
+  '<div class="indicator-list">' + indicatorsHtml + '</div>') +
   '<textarea placeholder="Notas adicionais sobre parâmetros microbiológicos (ex.: critérios específicos de fornecedores, plano de amostragem interno)…" data-field="notasMicrobio">' + escapeHtml(state.notasMicrobio) + '</textarea>' +
   '<div class="banner" style="margin-top:16px;">Fonte: Instituto Nacional de Saúde Doutor Ricardo Jorge (INSA). <i>Interpretação de resultados de ensaios microbiológicos em alimentos prontos para consumo… : valores-guia</i>. Lisboa: INSA, 2019. ' +
   '<a href="https://www.insa.min-saude.pt/wp-content/uploads/2019/12/INSA_Valores-guia.pdf" target="_blank" rel="noopener">Consultar documento original</a>. ' +
@@ -2045,14 +2105,17 @@ function renderFichaPadraoBody(ingList, activeAllergens, traceAllergens, nutriHt
     '<p style="font-size:9px;color:#000;margin-top:8px;">A ausência de alergénios detetados nos ingredientes não garante ausência de contaminação cruzada na cozinha.</p>' +
     nutriHtml +
     '<h3>Classificação microbiológica (INSA)</h3>' +
-    '<p style="font-size:11px;color:#000;">' + (group ? group.code + ' — ' + group.titulo : 'Não classificado.') + '</p>' +
+    '<p style="font-size:11px;color:#000;">' + (group ? (group.code === 'NA' ? group.titulo : group.code + ' — ' + group.titulo) : 'Não classificado.') + '</p>' +
+    (group && group.aviso ? '<p style="font-size:9px;color:#000;margin-top:-2px;">' + group.aviso + '</p>' : '') +
     (state.notasMicrobio ? '<pre style="color:#000;">' + escapeHtml(state.notasMicrobio) + '</pre>' : '') +
+    ((group && group.code === 'NA') ? '' : (
     '<p style="font-size:11px;color:#000;margin-top:10px;">Microrganismos patogénicos e toxinas — valores-guia (aplicável a alimentos prontos para consumo, em geral). ⚑ assinala relevância acrescida para os ingredientes desta receita.</p>' +
     renderFichaPathogenTable() +
     '<p style="font-size:9px;color:#000;margin-top:6px;">Fonte: "Valores-guia INSA" (Instituto Nacional de Saúde Doutor Ricardo Jorge, 2019) — valores indicativos, sem estatuto legal; confirme sempre com um responsável de segurança alimentar.</p>' +
     '<p style="font-size:11px;font-weight:600;margin-top:14px;margin-bottom:2px;color:#000;">Indicadores de higiene e de alteração</p>' +
     '<p style="font-size:9px;color:#000;margin-top:0;margin-bottom:8px;">Os limites numéricos (ufc/g) variam consoante o Grupo/Subgrupo; confirme os valores exatos por subgrupo na fonte oficial.</p>' +
-    renderFichaHygieneIndicators() +
+    renderFichaHygieneIndicators()
+    )) +
     '<h3>Preparação e higienização</h3>' +
     (checklistDone.length ? '<ul style="color:#000;font-size:11px;">' + checklistDone.map(function(c){return '<li>'+c+'</li>';}).join('') + '</ul>' : '') +
     (state.prepTexto ? '<div style="color:#000;font-size:11px;background:var(--brand-soft);border-left:3px solid #008DD2;padding:10px 12px;border-radius:3px;">' + state.prepTexto + '</div>' : '<p style="color:#000;font-size:11px;">Sem notas adicionais.</p>') +
@@ -2160,7 +2223,11 @@ function footerInnerHtml(){
       (state.responsavel && state.data ? ' · ' : '') +
       (state.data || '') : '') +
     '</div>' +
-    '<div style="font-size:0.85em;margin-top:2px;">Documento não controlado após impressão — a versão válida é sempre a mais recente no sistema. A Alimentarius não se responsabiliza por alterações manuais ou desatualizações após impressão.</div>';
+    '<div style="font-size:0.85em;margin-top:2px;">Documento não controlado após impressão — a versão válida é sempre a mais recente no sistema. A Alimentarius não se responsabiliza por alterações manuais ou desatualizações após impressão.</div>' +
+    (reportMode ? '<div style="border-top:1px solid var(--line-strong);background:var(--brand-soft);text-align:left;padding:4px 8px;margin-top:5px;">' +
+      '<div style="font-size:0.85em;">' + '<b style="color:#A13A2A;">+</b> Contém &nbsp;&nbsp; <b style="color:#B8792A;">△</b> Pode conter &nbsp;&nbsp; Em branco: Ausente</div>' +
+      '<div style="font-size:0.8em;margin-top:2px;">' + renderCompactAllergenLegend() + '</div>' +
+    '</div>' : '');
 }
 
 /* =========================================================
@@ -2228,11 +2295,7 @@ function renderAllergenReportView(){
       : tabelaHtml;
   }).join('');
 
-  var legendHtml = '<p style="font-size:10px;color:#000;margin-top:10px;"><b style="color:#A13A2A;">+</b> Contém &nbsp;&nbsp; <b style="color:#B8792A;">△</b> Pode conter &nbsp;&nbsp; Em branco: Ausente</p>';
   var disclaimerHtml = '<p style="font-size:9.5px;color:#000;margin-top:4px;">Esta tabela é calculada automaticamente com base na deteção de alergénios de cada ficha técnica e pode estar sujeita a alterações — confirme sempre com um responsável de segurança alimentar antes de utilização oficial ou entrega a um cliente.</p>';
-  var abbrevNoteHtml = '<h3>Nota: significado das abreviaturas</h3>' +
-    '<p style="font-size:9.5px;color:#000;margin-top:0;margin-bottom:2px;">Os 14 alergénios de declaração obrigatória (Regulamento (UE) n.º 1169/2011, anexo II) representados pelas abreviaturas usadas nas colunas da tabela acima.</p>' +
-    renderCompactAllergenLegend();
 
   return '' +
   '<div class="no-print" style="margin-bottom:16px;display:flex;gap:10px;flex-wrap:wrap;">' +
@@ -2243,7 +2306,7 @@ function renderAllergenReportView(){
   '</div>' +
   '<div class="print-header" id="print-header">' + headerHtml + '</div>' +
   '<div class="print-sheet" id="print-sheet">' +
-    tableHtml + legendHtml + disclaimerHtml + abbrevNoteHtml +
+    tableHtml + disclaimerHtml +
   '</div>' +
   '<div class="print-footer">' + footerInnerHtml() + '</div>';
 }
@@ -2260,7 +2323,7 @@ function renderMain(){
   else if(activeTab==='ficha') html = renderFicha();
   document.getElementById('main').innerHTML = html;
 }
-function renderAll(){ renderSidebar(); renderMain(); }
+function renderAll(){ renderSidebar(); renderMain(); updateIngredientDatalist(); }
 
 function escapeHtml(s){
   return (s==null?'':String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -2374,6 +2437,7 @@ document.addEventListener('click', function(e){
   else if(action==='sync-cancel'){ showSyncPanel=false; syncStatusMsg=''; renderSidebar(); }
   else if(action==='sync-confirm'){ saveSyncConfig(); }
   else if(action==='sync-disconnect'){ clearSyncConfig(); }
+  else if(action==='retry-connection'){ statusMsg = 'A tentar ligar…'; renderSidebar(); refreshIndex().then(function(){ statusMsg = ''; renderAll(); }); }
   else if(action==='load'){ loadRecipe(el.getAttribute('data-id')); }
   else if(action==='duplicate'){ duplicateRecipe(el.getAttribute('data-id')); }
   else if(action==='delete'){ deleteRecipe(el.getAttribute('data-id')); }
@@ -2462,6 +2526,7 @@ document.addEventListener('change', function(e){
   if(el.matches('select[data-ing-nova="true"]')){
     var nIdx = parseInt(el.getAttribute('data-idx'),10);
     state.ingredientes[nIdx].novaGrupo = el.value;
+    el.className = novaGrupoClass(el.value); // atualiza a cor sem refazer a tabela
     return;
   }
   if(el.matches('select[data-action="pick-known-client"]')){
@@ -2602,7 +2667,11 @@ async function buildPdfFooterCanvas(){
       (state.responsavel && state.data ? ' · ' : '') +
       (state.data || '') : '') +
     '</div>' +
-    '<div style="font-size:9px;color:#444;margin-top:3px;">Documento não controlado após impressão — a versão válida é sempre a mais recente no sistema. A Alimentarius não se responsabiliza por alterações manuais ou desatualizações após impressão.</div>';
+    '<div style="font-size:9px;color:#444;margin-top:3px;">Documento não controlado após impressão — a versão válida é sempre a mais recente no sistema. A Alimentarius não se responsabiliza por alterações manuais ou desatualizações após impressão.</div>' +
+    (reportMode ? '<div style="border-top:1px solid #ccc;background:#DCF0FA;text-align:left;padding:4px 8px;margin-top:5px;">' +
+      '<div style="font-size:9px;color:#222;">' + '<b>+</b> Contém &nbsp;&nbsp; <b>△</b> Pode conter &nbsp;&nbsp; Em branco: Ausente</div>' +
+      '<div style="font-size:8.5px;color:#222;margin-top:2px;">' + ALLERGENS.map(function(a){ return '<b>' + a.short + '</b>=' + escapeHtml(a.label); }).join(' &nbsp;·&nbsp; ') + '</div>' +
+    '</div>' : '');
   document.body.appendChild(el);
   var canvas;
   try{
@@ -2931,10 +3000,72 @@ function exportWord(){
 /* =========================================================
    PERSISTÊNCIA (appStorage — window.storage ou localStorage, consoante o ambiente)
    ========================================================= */
+/* Sugestões de ingredientes: nomes já usados em todas as fichas guardadas
+   (e na ficha aberta), mostrados como lista de pesquisa ao escrever o nome
+   de um ingrediente. Não há gestão à parte — deriva das fichas existentes. */
+var knownIngredientNames = [];
+async function refreshKnownIngredients(){
+  var porChave = {};
+  var nomes = [];
+  function juntar(lista){
+    (lista || []).forEach(function(ing){
+      var nome = ing && typeof ing.nome === 'string' ? ing.nome.trim() : '';
+      if(!nome) return;
+      var chave = normalize(nome);
+      if(porChave[chave]) return;
+      porChave[chave] = true;
+      nomes.push(nome);
+    });
+  }
+  try{
+    if(supabaseReady()){
+      var res = await fetch(supabaseUrlBase() + '?select=ingredientes:dados->ingredientes', { headers: supabaseHeaders() });
+      if(res.ok){
+        var rows = await res.json();
+        rows.forEach(function(r){ juntar(Array.isArray(r.ingredientes) ? r.ingredientes : []); });
+      }
+    } else if(storageOk){
+      for(var i=0;i<savedIndex.length;i++){
+        try{
+          var item = await appStorage.get('recipe:' + savedIndex[i].id);
+          if(item){ var d = JSON.parse(item.value); juntar(d && d.ingredientes); }
+        }catch(err){ /* ignora fichas que não foi possível ler */ }
+      }
+    }
+  }catch(err){ /* sem sugestões neste momento; a app funciona na mesma */ }
+  knownIngredientNames = nomes;
+  updateIngredientDatalist();
+}
+function updateIngredientDatalist(){
+  var dl = document.getElementById('ingredient-datalist');
+  if(!dl) return;
+  var vistos = {};
+  var todos = [];
+  function add(nome){
+    nome = (nome || '').trim();
+    if(!nome) return;
+    var chave = normalize(nome);
+    if(vistos[chave]) return;
+    vistos[chave] = true;
+    todos.push(nome);
+  }
+  knownIngredientNames.forEach(add);
+  ((state && state.ingredientes) || []).forEach(function(ing){ add(ing && ing.nome); });
+  todos.sort(function(a,b){ return a.localeCompare(b, 'pt'); });
+  dl.innerHTML = todos.slice(0, 2000).map(function(n){ return '<option value="' + escapeAttr(n) + '"></option>'; }).join('');
+}
 async function refreshIndex(){
+  await refreshIndexCore();
+  refreshKnownIngredients(); // sem await: não atrasa o arranque da app
+}
+async function refreshIndexCore(){
   if(supabaseReady()){
-    try{ savedIndex = await supabaseListRecipes(); }
-    catch(err){ savedIndex = []; syncStatusMsg = 'Não foi possível ligar ao Supabase neste momento.'; }
+    try{ savedIndex = await supabaseListRecipes(); supabaseListError = ''; }
+    catch(err){
+      savedIndex = [];
+      syncStatusMsg = 'Não foi possível ligar ao Supabase neste momento.';
+      supabaseListError = (err && err.message) ? String(err.message) : 'erro desconhecido';
+    }
     return;
   }
   if(!storageOk){ savedIndex = []; return; }
@@ -2959,7 +3090,7 @@ async function saveRecipe(){
     if(!state.id) state.id = 'r_' + Date.now();
     await appStorage.set('recipe:' + state.id, JSON.stringify(state));
     var idx = savedIndex.findIndex(function(r){return r.id===state.id;});
-    var entry = { id:state.id, nome:state.nome || 'Sem nome', categoria:state.categoria, idCliente:state.idCliente || '', empresaNome:state.empresaNome || '', empresaContacto:state.empresaContacto || '', nif:state.nif || '', updatedAt:new Date().toISOString() };
+    var entry = { id:state.id, nome:state.nome || 'Sem nome', categoria:state.categoria, idCliente:state.idCliente || '', empresaNome:state.empresaNome || '', empresaContacto:state.empresaContacto || '', nif:state.nif || '', responsavel:state.responsavel || '', updatedAt:new Date().toISOString() };
     if(idx===-1) savedIndex.push(entry); else savedIndex[idx] = entry;
     await appStorage.set('recipes-index', JSON.stringify(savedIndex));
     statusMsg = 'Ficha guardada.';
@@ -3154,7 +3285,7 @@ async function importData(file){
         await appStorage.set('recipe:' + id, JSON.stringify(ficha));
       }
       var idx = savedIndex.findIndex(function(r){ return r.id===id; });
-      var entry = { id:id, nome:ficha.nome || 'Sem nome', categoria:ficha.categoria || '', idCliente:ficha.idCliente || '', empresaNome:ficha.empresaNome || '', empresaContacto:ficha.empresaContacto || '', nif:ficha.nif || '', updatedAt:new Date().toISOString() };
+      var entry = { id:id, nome:ficha.nome || 'Sem nome', categoria:ficha.categoria || '', idCliente:ficha.idCliente || '', empresaNome:ficha.empresaNome || '', empresaContacto:ficha.empresaContacto || '', nif:ficha.nif || '', responsavel:ficha.responsavel || '', updatedAt:new Date().toISOString() };
       if(idx===-1) savedIndex.push(entry); else savedIndex[idx] = entry;
       importadas++;
     }
