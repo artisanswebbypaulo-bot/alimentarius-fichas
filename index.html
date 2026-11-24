@@ -350,7 +350,7 @@ function novaGrupoOptions(current){
   }).join('');
   return opts;
 }
-var APP_VERSION = 'build 2026-11-23-01';
+var APP_VERSION = 'build 2026-11-24-01';
 var ALLERGENS = [
   { id:'gluten', label:'Glúten', short:'GLU',
     test:function(t){
@@ -732,6 +732,7 @@ var appStorage = {
   }
 };
 var statusMsg = '';
+var fichaSearch = ''; // texto escrito no campo "Procurar ficha" da barra lateral
 var clientFilter = ''; // ID Cliente selecionado para filtrar a lista de fichas guardadas ('' = todos)
 var reportMode = false;   // true quando se está a ver a tabela de alergénios do cliente, em vez da ficha
 var fichaViewMode = 'padrao'; // 'padrao' ou 'profissional' — qual versão da Ficha final está a ser vista/exportada
@@ -901,6 +902,36 @@ var PREP_CHECKLIST_ITEMS = [
 /* =========================================================
    RENDER — SIDEBAR
    ========================================================= */
+/* Lista de fichas guardadas. Com texto na pesquisa, procura em TODAS as fichas
+   (de todos os clientes), sem distinguir maiúsculas/minúsculas nem acentos, para
+   se ver depressa se uma ficha já está lançada. */
+function savedListHtml(){
+  var q = normalize((fichaSearch || '').trim());
+  var base = q ? savedIndex : (clientFilter ? savedIndex.filter(function(r){ return r.idCliente===clientFilter; }) : savedIndex);
+  var lista = q ? base.filter(function(r){ return normalize(r.nome || '').indexOf(q) !== -1; }) : base;
+  if(!lista.length){
+    var msg;
+    if(supabaseReady() && supabaseListError) msg = 'Não foi possível carregar as fichas.';
+    else if(q) msg = 'Nenhuma ficha encontrada com “' + escapeHtml(fichaSearch.trim()) + '”. Ainda não está lançada.';
+    else if(clientFilter) msg = 'Este cliente ainda não tem fichas guardadas.';
+    else msg = 'Ainda sem fichas guardadas.';
+    return '<div style="font-size:12px;color:var(--ink-faint);padding:4px 8px;">' + msg + '</div>';
+  }
+  return lista.map(function(r){
+    var cli = (q && r.idCliente) ? ' <span style="font-size:10.5px;opacity:.7;">· ' + escapeHtml(r.idCliente) + '</span>' : '';
+    return '<div class="saved-item ' + (r.id===state.id?'current':'') + '">' +
+      '<button class="saved-name" data-action="load" data-id="' + r.id + '" title="' + escapeHtml((r.nome||'Sem nome') + (r.idCliente ? ' — ' + r.idCliente : '')) + '">' + escapeHtml(r.nome || 'Sem nome') + cli + '</button>' +
+      '<button data-action="duplicate" data-id="' + r.id + '" title="Duplicar">⧉</button>' +
+      '<button data-action="delete" data-id="' + r.id + '" title="Eliminar">✕</button>' +
+    '</div>';
+  }).join('');
+}
+function savedSearchInfo(){
+  var q = normalize((fichaSearch || '').trim());
+  if(!q) return '';
+  var n = savedIndex.filter(function(r){ return normalize(r.nome || '').indexOf(q) !== -1; }).length;
+  return n + ' de ' + savedIndex.length + ' ficha' + (savedIndex.length===1 ? '' : 's') + ' (todos os clientes)';
+}
 function renderSidebar(){
   var stepsHtml = TABS.map(function(t,i){
     return '<button class="step-btn ' + (activeTab===t.id?'active':'') + '" data-action="tab" data-tab="' + t.id + '">' +
@@ -916,14 +947,7 @@ function renderSidebar(){
     (clientFilter ? '<button class="btn small block" data-action="generate-report" style="margin-bottom:8px;" title="Tabela com todos os alergénios de todas as fichas deste cliente">📋 Tabela de alergénios deste cliente</button>' : '')
     : '';
 
-  var visibleIndex = clientFilter ? savedIndex.filter(function(r){ return r.idCliente===clientFilter; }) : savedIndex;
-  var savedHtml = visibleIndex.map(function(r){
-    return '<div class="saved-item ' + (r.id===state.id?'current':'') + '">' +
-      '<button class="saved-name" data-action="load" data-id="' + r.id + '" title="' + escapeHtml(r.nome||'Sem nome') + '">' + escapeHtml(r.nome || 'Sem nome') + '</button>' +
-      '<button data-action="duplicate" data-id="' + r.id + '" title="Duplicar">⧉</button>' +
-      '<button data-action="delete" data-id="' + r.id + '" title="Eliminar">✕</button>' +
-    '</div>';
-  }).join('') || '<div style="font-size:12px;color:var(--ink-faint);padding:4px 8px;">' + (supabaseReady() && supabaseListError ? 'Não foi possível carregar as fichas.' : (clientFilter ? 'Este cliente ainda não tem fichas guardadas.' : 'Ainda sem fichas guardadas.')) + '</div>';
+  var savedHtml = savedListHtml();
 
   // Aviso bem visível quando o Supabase não responde (ex.: projeto gratuito em pausa),
   // para a lista vazia nunca parecer "sem fichas".
@@ -953,6 +977,8 @@ function renderSidebar(){
     connectionWarningHtml +
     '<div class="saved-list-title">Fichas guardadas</div>' +
     clientFilterHtml +
+    (savedIndex.length ? '<input type="search" data-action="ficha-search" placeholder="Procurar ficha…" aria-label="Procurar ficha guardada" autocomplete="off" value="' + escapeAttr(fichaSearch) + '" style="width:100%;margin-bottom:4px;padding:6px 8px;border:1px solid var(--line-strong);border-radius:4px;font-size:12.5px;box-sizing:border-box;">' +
+      '<div id="ficha-search-info" style="font-size:11px;color:var(--ink-faint);margin:0 0 6px 2px;min-height:14px;">' + savedSearchInfo() + '</div>' : '') +
     '<div class="saved-list">' + savedHtml + '</div>' +
     '<div class="storage-note">' + storageNoteText() + '</div>' +
     renderSyncPanel() +
@@ -2563,6 +2589,15 @@ document.addEventListener('change', function(e){
 
 document.addEventListener('input', function(e){
   var el = e.target;
+
+  if(el.matches('[data-action="ficha-search"]')){
+    fichaSearch = el.value;
+    var lst = document.querySelector('.saved-list');
+    if(lst) lst.innerHTML = savedListHtml();
+    var info = document.getElementById('ficha-search-info');
+    if(info) info.textContent = savedSearchInfo();
+    return;
+  }
 
   if(el.matches('[data-rte-field]')){
     state[el.getAttribute('data-rte-field')] = sanitizeRichText(el.innerHTML);
